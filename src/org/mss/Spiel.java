@@ -1,0 +1,96 @@
+package org.mss;
+import org.mss.Spieler;
+import org.mss.types.Turn;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+public abstract class Spiel extends Spielfeld implements Protokollierbar {
+	protected ArrayList<Spieler> spieler = null;
+	protected boolean track = false;
+	protected ArrayList<Turn> turns = null;
+	protected Spieler[] winner = null;
+	
+	public abstract Turn queryPlayer(Spieler spieler);
+	public abstract Spieler[] spielzug(Turn turn) throws Exception;//nimmt Spielzug an und prüft ob gültig
+	public abstract Spieler[] durchgang();//gibt die Liste der Spieler in korrekter Reihenfolge durch
+	public abstract Spieler[] runde();//sagt ob einer gewonnen hat
+	public abstract Spieler nextPlayer();
+	
+	public Spieler[] playerList() {
+		Iterator<Spieler> it = this.spieler.iterator();
+		Spieler[] spieler = new Spieler[this.spieler.size()];
+		int i = 0;
+		while(it.hasNext()) {
+			spieler[i++] = it.next();
+		}
+		return spieler;
+	}
+
+	public Spiel() {
+		spieler = new ArrayList<Spieler>(2);
+	}
+	
+	public void track(boolean track) {
+		this.track = track;
+	}
+	public void addTurn(Turn turn) {
+		turns.add(turn);
+	}
+
+	public int findTurn(Turn turn) {
+		Turn temp = null;
+		Iterator<Turn> it = turns.iterator();
+
+		while (it.hasNext()) {
+			temp = (Turn) it.next();
+			if (temp.equals(turn)) {
+				return turns.size() - turns.indexOf(temp);//So das der Spieler weiß der wie vielte Zug es war;
+			}
+		}
+		return -1;
+	}
+
+	public boolean removeTurn(Turn turn) {
+		if (findTurn(turn) != -1) {
+			turns.remove(turns.size() - findTurn(turn));
+			return true;
+		} else {
+			//Zug nicht gefunden, so nix zu entfernen und Antworte
+			return false;
+		}
+	}
+
+	public void listTurns() {
+		Iterator<Turn> iterate = turns.iterator();
+		Turn turn = null;
+		System.out.println("Spielzüge:");
+		while (iterate.hasNext()) {
+			turn = iterate.next();
+			System.out.println(turn.toString());
+		}
+	}
+
+	public void displayFeld() {
+		for (int i = 0; i < height; i++) {
+			System.out.print("|");
+			for (int j = 0; j < width; j++) {
+				System.out.print("--|");
+			}
+			System.out.println();
+			System.out.print("|");
+			for (int j = 0; j < width; j++) {
+				System.out.print(feld[i][j]+ " |");
+			}
+			System.out.println(height-i-1);
+		}
+		System.out.print("|");
+		for (int j = 0; j < width; j++) {
+			System.out.print((Integer.toString(j).length() ==1)? j+"-|": j+"|");
+		}
+		System.out.println();
+	}
+	
+	public boolean addPlayer(Spieler spieler) throws Exception{
+		return this.spieler.add(spieler);
+	}
+}
