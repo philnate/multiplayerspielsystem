@@ -1,6 +1,8 @@
 package org.mss;
 import org.mss.Spieler;
 import org.mss.types.Turn;
+import org.mss.utils.Console;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -11,11 +13,38 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 	protected Spieler[] winner = null;
 	
 	public abstract Turn queryPlayer(Spieler spieler);
-	public abstract Spieler[] spielzug(Turn turn) throws Exception;//nimmt Spielzug an und prüft ob gültig
-	public abstract Spieler[] durchgang();//gibt die Liste der Spieler in korrekter Reihenfolge durch
-	public abstract Spieler[] runde();//sagt ob einer gewonnen hat
+	public abstract Spieler[] spielzug(Turn turn) throws Exception;
+	public abstract Spieler[] runde();
 	public abstract Spieler nextPlayer();
-	
+
+	public Spieler[] durchgang() {
+		//displayFeld();
+		boolean error =false;
+		do {
+			try {
+				spielzug(queryPlayer(nextPlayer()));
+				if (winner != null) {
+					return winner;
+				} 
+			} catch (Exception e) {
+				error = true;
+				e.printStackTrace();
+				Console.read("Wait a second", 42);
+			}
+		} while (error);
+		do {
+			try {
+				spielzug(queryPlayer(nextPlayer()));
+				return winner;
+			} catch (Exception e) {
+				error = true;
+				e.printStackTrace();
+				Console.read("Wait a second", 42);
+			}
+		} while (error);
+		return winner;
+	}
+
 	public Spieler[] playerList() {
 		Iterator<Spieler> it = this.spieler.iterator();
 		Spieler[] spieler = new Spieler[this.spieler.size()];

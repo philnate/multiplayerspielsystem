@@ -59,21 +59,6 @@ public class Chomp extends Spiel {
 	}
 	
 	@Override
-	public Spieler[] durchgang() {
-		try {
-			spielzug(queryPlayer(nextPlayer()));
-			if (winner != null) {
-				return winner;
-			}
-			spielzug(queryPlayer(nextPlayer()));
-			return winner;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	@Override
 	public Spieler[] runde() {
 		while (winner == null) {
 			durchgang();
@@ -94,6 +79,7 @@ public class Chomp extends Spiel {
 	public Turn queryPlayer(Spieler spieler) {
 		//displayFeld();
 		if (spieler.isComp()) {
+			System.out.println("Computer "+ spieler.getName() + " ist an der Reihe.");
 			return kI(spieler);
 		}
 		System.out.println(spieler.toString() + " du bist dran:");
