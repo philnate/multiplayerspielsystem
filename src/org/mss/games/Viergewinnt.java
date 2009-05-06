@@ -97,7 +97,17 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 			System.out.println(turn.getSpieler().toString() + " setzt in die Reihe: " + turn.getToX());
 		}
 	}
-	
+
+	public boolean removeTurn() {
+		if (turns.size() != 0) {
+			Turn turn = turns.get(turns.size()-1);
+			feld[hoehe[turn.getToX()]--][turn.getToX()] = " ";
+			turns.remove(0);
+			return true;
+		} else {
+			return false;
+		}
+	}
 	public Spieler nextPlayer() {
 		if (spieler1) {
 			return spieler.get(0);

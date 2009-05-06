@@ -50,16 +50,6 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 		return -1;
 	}
 
-	public boolean removeTurn(Turn turn) {
-		if (findTurn(turn) != -1) {
-			turns.remove(turns.size() - findTurn(turn));
-			return true;
-		} else {
-			//Zug nicht gefunden, so nix zu entfernen und Antworte
-			return false;
-		}
-	}
-
 	public void listTurns() {
 		Iterator<Turn> iterate = turns.iterator();
 		Turn turn = null;

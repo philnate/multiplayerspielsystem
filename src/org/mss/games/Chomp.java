@@ -132,6 +132,25 @@ public class Chomp extends Spiel {
 			System.out.println(turn.getSpieler().toString() + " setzt auf die Position: X:" + turn.getToX() + " Y:" + turn.getToY());
 		}
 	}
+	
+	public boolean removeTurn() {
+		//TODO Zuglöschen einbauen
+		if (turns.size() != 0) {
+			Turn lastTurn = turns.get(turns.size()-1);
+			Turn toDo = null;
+			if (turns.size() >=2) {
+				Turn preLastTurn = turns.get(turns.size()-2);
+				toDo = new Turn(lastTurn.getSpieler(),preLastTurn.getFromX(),preLastTurn.getFromY(),lastTurn.getToX(),lastTurn.getToY());
+			} else {
+				toDo = new Turn(lastTurn.getSpieler(),width,height,lastTurn.getToX(),lastTurn.getToY());
+			}
+			
+			turns.remove(0);
+			return true;
+		} else {
+			return false;
+		}
+	}
 	@Override
 	public boolean addPlayer(Spieler spieler) throws Exception {
 		if (this.spieler.size() == 2) {
