@@ -36,7 +36,6 @@ public class Tempserv {
 				spiel.addPlayer(spieler1);
 				spiel.addPlayer(spieler2);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			spiel.displayFeld();
@@ -80,8 +79,8 @@ public class Tempserv {
 	}
 
 	private static void coreQuestions() {
-		vier = (Console.read("1:Viergewinnt;2:Chomp",1)==1)? true:false;
-		comp = (Console.read("Gegen Mensch(1) oder PC(2)",2) ==1)? false:true;
+		vier = (Console.read("1:Viergewinnt;2:Chomp",2)==1)? true:false;
+		comp = (Console.read("Gegen Mensch(1) oder PC(2)",1) ==1)? false:true;
 
 		if (newPlayer) {
 			spieler1 = new Spieler(Console.read("Name Spieler1",""));
