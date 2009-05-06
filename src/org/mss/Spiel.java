@@ -18,7 +18,6 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 	public abstract Spieler nextPlayer();
 
 	public Spieler[] durchgang() {
-		//displayFeld();
 		boolean error =false;
 		do {
 			try {

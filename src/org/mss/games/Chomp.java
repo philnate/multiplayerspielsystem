@@ -38,22 +38,9 @@ public class Chomp extends Spiel {
 		if (turn == null) {
 			throw new Exception ("Kein Zug übergeben!");
 		}
-		if ((turn.getToX() < width && turn.getToX() >= 0) 
-				&& (turn.getToY() < height && turn.getToY() >= 0) 
-				&& feld[turn.getToY()][turn.getToX()].contentEquals(" ")) {
-			for (int i = turn.getToX(); i < width; i++) {
-				for (int j = turn.getToY(); j < height; j++) {
-					if (feld[j][i].contentEquals(" ")) {
-						feld[j][i] = (spieler1)? "X":"O";
-					}
-				}
-			}
-			spieler1 = !spieler1;
-			displayFeld();
-		} else {
-			System.out.println("Exception");
-			throw new Exception ("Zug liegt nicht im Spielfeld, oder Feld ist bereits belegt!");
-		}
+		setTurn(turn);
+		spieler1 = !spieler1;
+		displayFeld();
 		checkWin();
 		return winner;
 	}
@@ -90,6 +77,26 @@ public class Chomp extends Spiel {
 		return new Turn(spieler, 0,0, col, height-1 - row);
 	}
 
+	private void setTurn(Turn turn) throws Exception {
+		if ((turn.getToX() < width && turn.getToX() >= 0) 
+				&& (turn.getToY() < height && turn.getToY() >= 0) 
+				&& feld[turn.getToY()][turn.getToX()].contentEquals(" ")) {
+			for (int i = turn.getToX(); i < width; i++) {
+				for (int j = turn.getToY(); j < height; j++) {
+					if (feld[j][i].contentEquals(" ")) {
+						feld[j][i] = (spieler1)? "X":"O";
+					}
+				}
+			}
+			if (track) {
+				addTurn(turn);
+			}
+		} else {
+			System.out.println("Exception");
+			throw new Exception ("Zug liegt nicht im Spielfeld, oder Feld ist bereits belegt!");
+		}
+	}
+
 	private Turn kI(Spieler spieler) {
 		return new Turn(spieler, 0,0,0,0);
 	}
@@ -105,6 +112,7 @@ public class Chomp extends Spiel {
 		default: break;
 		}
 	}
+
 	public void listTurns() {
 		Iterator<Turn> iterate = turns.iterator();
 		Turn turn = null;
@@ -115,19 +123,27 @@ public class Chomp extends Spiel {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public boolean removeTurn() {
-		//TODO Zuglöschen einbauen
 		if (turns.size() != 0) {
-			Turn lastTurn = turns.get(turns.size()-1);
-			Turn toDo = null;
-			if (turns.size() >=2) {
-				Turn preLastTurn = turns.get(turns.size()-2);
-				toDo = new Turn(lastTurn.getSpieler(),preLastTurn.getFromX(),preLastTurn.getFromY(),lastTurn.getToX(),lastTurn.getToY());
-			} else {
-				toDo = new Turn(lastTurn.getSpieler(),width,height,lastTurn.getToX(),lastTurn.getToY());
+			for (int i = 0; i < width; i++) {
+				for (int j = 0; j < height; j++) {
+					feld[j][i] = " ";
+				}
 			}
+
+			turns.remove(turns.size()-1);
+			ArrayList<Turn> theTurns = (ArrayList<Turn>) turns.clone();
+			turns = new ArrayList<Turn>(width*height/3);
 			
-			turns.remove(0);
+			Iterator<Turn> it = theTurns.iterator();
+			while (it.hasNext()) {
+				try {
+					setTurn(it.next());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			return true;
 		} else {
 			return false;
