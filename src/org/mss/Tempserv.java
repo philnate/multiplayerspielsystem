@@ -14,19 +14,15 @@ public class Tempserv {
 	static Spieler spieler2 = null;
 	
 	public static void main(String[] args) throws IOException{
-		System.out.println("Willkommen bei MSS was wollen Sie spielen:");
-		System.out.println("1:Viergewinnt;2:Chomp (def 1)?");
-		boolean vier = (Console.read(2)==1)? true:false;
+
+		boolean vier = (Console.read("1:Viergewinnt;2:Chomp",2)==1)? true:false;
 		
-		System.out.println("Gegen Mensch(1) oder PC(2) (def 1)?");
-		boolean comp = (Console.read(1) ==1)? false:true;
+		boolean comp = (Console.read("Gegen Mensch(1) oder PC(2)",1) ==1)? false:true;
 		
-		System.out.println("Name Spieler1 (leer für default):");
-		spieler1 = new Spieler(Console.read(""));
+		spieler1 = new Spieler(Console.read("Name Spieler1",""));
 		
 		if (!comp) {
-			System.out.println("Name Spieler2 (leer für default):");
-			spieler2 = new Spieler(Console.read(""));
+			spieler2 = new Spieler(Console.read("Name Spieler2",""));
 		} else {
 			spieler2 = new Spieler();
 		}
@@ -38,11 +34,9 @@ public class Tempserv {
 		System.out.println("Höhe (leer für default):");
 		height = Console.read(0);
 		
-		System.out.println("Protokollieren(default nein)?");
-		protokol = Console.read("nein").contentEquals("nein")? false:true;
+		protokol = Console.read("Protokollieren","nein").contentEquals("nein")? false:true;
 
 		Spiel spiel = null;
-
 		if (vier) {
 			spiel = (Spiel) ((width == 0 && height == 0)? new Viergewinnt():new Viergewinnt(width, height));
 		} else {
@@ -76,6 +70,6 @@ public class Tempserv {
 	}
 	
 	private void abfragen() {
-		
+
 	}
 }
