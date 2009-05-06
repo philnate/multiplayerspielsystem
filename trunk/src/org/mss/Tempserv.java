@@ -22,8 +22,6 @@ public class Tempserv {
 	public static void main(String[] args) throws IOException{
 		abfragen();
 		do {
-
-			
 			Spiel spiel = null;
 			if (vier) {
 				spiel = (Spiel) ((width == 0 && height == 0)? new Viergewinnt():new Viergewinnt(width, height));
@@ -42,7 +40,9 @@ public class Tempserv {
 			}
 			spiel.displayFeld();
 			Spieler winner[] = spiel.runde();
-	
+			spiel.listTurns();
+			spiel.removeTurn();
+			spiel.displayFeld();
 	
 			if (winner.length == 1) {
 				System.out.println("Gewonnen hat der Spieler:"+winner[0].toString());	
@@ -82,7 +82,7 @@ public class Tempserv {
 		vier = (Console.read("1:Viergewinnt;2:Chomp",1)==1)? true:false;
 		comp = (Console.read("Gegen Mensch(1) oder PC(2)",1) ==1)? false:true;
 
-		if (!newPlayer) {
+		if (newPlayer) {
 			spieler1 = new Spieler(Console.read("Name Spieler1",""));
 			
 			if (!comp) {
@@ -98,6 +98,6 @@ public class Tempserv {
 		System.out.println("Höhe (leer für default):");
 		height = Console.read(0);
 		
-		protokol = Console.read("Protokollieren","nein").contentEquals("nein")? false:true;
+		protokol = Console.read("Protokollieren","ja").contentEquals("nein")? false:true;
 	}
 }
