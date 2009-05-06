@@ -42,35 +42,6 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 	}
 
 	@Override
-	public Spieler[] durchgang() {
-		//displayFeld();
-		boolean error =false;
-		do {
-			try {
-				spielzug(queryPlayer(nextPlayer()));
-				if (winner != null) {
-					return winner;
-				} 
-			} catch (Exception e) {
-				error = true;
-				e.printStackTrace();
-				Console.read("Wait a second", 42);
-			}
-		} while (error);
-		do {
-			try {
-				spielzug(queryPlayer(nextPlayer()));
-				return winner;
-			} catch (Exception e) {
-				error = true;
-				e.printStackTrace();
-				Console.read("Wait a second", 42);
-			}
-		} while (error);
-		return winner;
-	}
-
-	@Override
 	public Spieler[] spielzug(Turn turn) throws Exception{
 		if (winner != null) return null;//jemand hat bereits gewonnen also aufhören mit weiterspielen
 		if (spieler.size() != 2) {
