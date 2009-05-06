@@ -14,16 +14,13 @@ public class Chomp extends Spiel {
 	public Chomp(int width, int height) {
 		this.width = (width > 0)? width:-width;
 		this.height = (height > 0)? height:-height;
-//		hoehe = new int[this.width];
+
 		feld = new String[this.height][this.width];
 		for (int i = 0; i < this.height; i++) {
 			for (int j = 0;j < this.width; j++) {
 				feld[i][j] = " ";
 			}
 		}
-//		for (int i = 0; i < this.width; i++) {
-//			hoehe[i] = this.height;
-//		}
 		this.turns = new ArrayList<Turn>(this.width*this.height/3);
 	}
 	
@@ -44,7 +41,6 @@ public class Chomp extends Spiel {
 		if ((turn.getToX() < width && turn.getToX() >= 0) 
 				&& (turn.getToY() < height && turn.getToY() >= 0) 
 				&& feld[turn.getToY()][turn.getToX()].contentEquals(" ")) {
-		System.out.println(turn.toString());
 			for (int i = turn.getToX(); i < width; i++) {
 				for (int j = turn.getToY(); j < height; j++) {
 					if (feld[j][i].contentEquals(" ")) {

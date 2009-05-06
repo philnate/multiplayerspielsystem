@@ -1,5 +1,6 @@
 package org.mss;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.mss.games.*;
 import org.mss.Spiel;
@@ -18,7 +19,7 @@ public class Tempserv {
 	static Spieler spieler2 = null;
 	static boolean newPlayer = true;
 	static boolean nextGame = false;
-	
+
 	public static void main(String[] args) throws IOException{
 		abfragen();
 		do {
@@ -40,9 +41,9 @@ public class Tempserv {
 			}
 			spiel.displayFeld();
 			Spieler winner[] = spiel.runde();
-			spiel.listTurns();
-			spiel.removeTurn();
-			spiel.displayFeld();
+//			spiel.listTurns();
+//			spiel.removeTurn();
+//			spiel.displayFeld();
 	
 			if (winner.length == 1) {
 				System.out.println("Gewonnen hat der Spieler:"+winner[0].toString());	
@@ -80,7 +81,7 @@ public class Tempserv {
 
 	private static void coreQuestions() {
 		vier = (Console.read("1:Viergewinnt;2:Chomp",1)==1)? true:false;
-		comp = (Console.read("Gegen Mensch(1) oder PC(2)",1) ==1)? false:true;
+		comp = (Console.read("Gegen Mensch(1) oder PC(2)",2) ==1)? false:true;
 
 		if (newPlayer) {
 			spieler1 = new Spieler(Console.read("Name Spieler1",""));
