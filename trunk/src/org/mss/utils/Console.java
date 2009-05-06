@@ -8,6 +8,18 @@ public final class Console {
 	private static BufferedReader cons = new BufferedReader(new InputStreamReader(System.in));
 	
 	public static String read(String def) {
+		return read("", def);
+	}
+
+	public static String read(String description, String def) {
+		if (description != "") {
+			System.out.print(description);
+			if (def != "") {
+				System.out.println(" (def: " + def + ")?");	
+			} else {
+				System.out.println(" (leer für default)?");
+			}
+		}
 		String res = "";
 		try {
 			res = cons.readLine();
@@ -22,7 +34,10 @@ public final class Console {
 		return res;
 	}
 	
-	public static int read(int def) {
+	public static int read(String description, int def) {
+		if (description != "") {
+			System.out.print(description + " (def: " + def + ")?");
+		}
 		int res;
 		try {
 			res =Integer.parseInt(cons.readLine());
@@ -35,4 +50,9 @@ public final class Console {
 		
 		return res;
 	}
+	
+	public static int read(int def) {
+		return read("", def);
+	}
+	
 }
