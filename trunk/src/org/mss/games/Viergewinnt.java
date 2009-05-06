@@ -44,18 +44,30 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 	@Override
 	public Spieler[] durchgang() {
 		//displayFeld();
-		try {
-			spielzug(queryPlayer(nextPlayer()));
-			if (winner != null) {
-				return winner;
+		boolean error =false;
+		do {
+			try {
+				spielzug(queryPlayer(nextPlayer()));
+				if (winner != null) {
+					return winner;
+				} 
+			} catch (Exception e) {
+				error = true;
+				e.printStackTrace();
+				Console.read("Wait a second", 42);
 			}
-			spielzug(queryPlayer(nextPlayer()));
-			return winner;
-		} catch (Exception e) {
-			e.printStackTrace();
-			Console.read(32);
-			return null;
-		}
+		} while (error);
+		do {
+			try {
+				spielzug(queryPlayer(nextPlayer()));
+				return winner;
+			} catch (Exception e) {
+				error = true;
+				e.printStackTrace();
+				Console.read("Wait a second", 42);
+			}
+		} while (error);
+		return winner;
 	}
 
 	@Override
@@ -64,7 +76,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 		if (spieler.size() != 2) {
 			throw new Exception("Es muss genau 2 Spieler geben!");
 		}
-		
+
 		if (turn == null) {
 			throw new Exception("Kein Zug übergeben!");
 		}
@@ -119,6 +131,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 	public Turn queryPlayer(Spieler spieler) {
 		//displayFeld();
 		if (spieler.isComp()) {
+			System.out.println("Computer " + spieler.getName() + " ist an der Reihe.");
 			return kI(spieler);
 		}
 		System.out.println(spieler.toString() + " du bist dran:");
@@ -152,7 +165,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 				setTo[i] += 100;
 			}
 			//3er Vertikal möglich
-			if (check.indexOf("  "+player.substring(2)) != -1 && (Math.random() < .95)) {
+			if (check.indexOf("  "+player.substring(2)) != -1 && (Math.random() < .8)) {
 				setTo[i] += 15;
 			}
 			//2er Vertikal möglich
@@ -166,7 +179,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 				setTo[i] += 90;
 			}
 			//Verhindern eines 3er
-			if (check.indexOf("  " + enemy.substring(2)) != -1 && (Math.random() < .4)) {
+			if (check.indexOf("  " + enemy.substring(2)) != -1 && (Math.random() < .5)) {
 				setTo[i] += 15;
 			}
 		}
