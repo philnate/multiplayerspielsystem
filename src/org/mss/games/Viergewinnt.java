@@ -3,7 +3,6 @@ import org.mss.Spiel;
 import org.mss.types.Turn;
 import org.mss.Spieler;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import org.mss.utils.Console;
 
@@ -25,7 +24,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 		for (int i = 0; i < this.width; i++) {
 			hoehe[i] = this.height;
 		}
-		this.turns = new ArrayList<Turn>(this.width*this.height);
+		//this.turns = new ArrayList<Turn>(this.width*this.height);
 	}
 
 	public Viergewinnt() {
@@ -100,7 +99,6 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 	}
 
 	public Turn queryPlayer(Spieler spieler) {
-		//displayFeld();
 		if (spieler.isComp()) {
 			System.out.println("Computer " + spieler.getName() + " ist an der Reihe.");
 			return kI(spieler);
@@ -262,6 +260,36 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 				}
 			}
 		}
+		//-> /-Diagonale Prüfen
+		//->Eigene Gewinnchancen
+		String toCheck = "";
+		// /-Diagonalen bestimmen
+		for (int i = 0; i < width; i++) {
+			int j = 0;
+			int temp = i;
+			while (temp >= 0 && j < height) {
+				toCheck += feld[j][temp];
+				j++;
+				temp--;
+			}
+			if ((curPos = toCheck.indexOf(enemy.substring(1) + " ")) != -1 && Math.random() < .95) {
+				System.out.println("yeppa");
+				System.out.println(hoehe[i+curPos+3] + " "+i + " "+curPos);
+				if (hoehe[i+curPos+3] == curPos+3 ) {
+					setTo[i+curPos+3] +=90;
+				}
+			}
+			toCheck = ""; 
+		}
+//		//untere Diagonalen
+//		for (int j = 1; j < height; j++) {
+//			int i = width-1;
+//			int temp = j;
+//			while (i >= 0 && temp < height) {
+//				toCheck += feld[temp++][i--];
+//			}
+//			toCheck += ";";
+//		}
 		//TODO Diagonalen prüfen
 		int maxVal = 0;
 		for (int i = 0; i < width; i++) {
