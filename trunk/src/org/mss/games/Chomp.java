@@ -2,6 +2,7 @@ package org.mss.games;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 
 import org.mss.types.Turn;
 import org.mss.utils.Console;
@@ -98,8 +99,60 @@ public class Chomp extends Spiel {
 	}
 
 	private Turn kI(Spieler spieler) {
-		System.out.println("Ich werde mal eine KI");
-		return new Turn(spieler, 0,0,0,0);
+		
+		System.out.println(width + " " + height);
+		
+		boolean needKi = false;
+		boolean isFree = false;
+		int col = 0;
+		int row = 0;
+		Random random = new Random();
+		
+		// TODO vielleicht anders, indem man prüft, ob "unterhalb" noch was frei ist und nicht
+		//      "oberhalb" was gesetzt
+		
+		
+		// prüfen, ob in den ersten beiden Reihen schon was gesetzt ist
+		for(int i = 0; i < 2; i++){
+			for(int j = 0; j < feld.length; j++){
+				if(feld[i][j] != " "){
+					needKi = true;
+				}
+			}
+		}
+		
+		// prüfen, ob in den ersten beiden Spalten schon was gesetzt ist
+		for(int i = feld.length; i < 2; i++){
+			for(int j = 0; j < 2; j++){
+				if(feld[i][j] != " "){
+					needKi = true;
+				}
+			}
+		}
+		
+		// zufälliges Feld berechnen und prüfen, ob es schon gesetzt ist
+		// feld[0][0] und feld[1][1] dürfen dabei nicht gesetzt werden
+		if(needKi != true){
+			while(isFree == false){
+				col = random.nextInt(width-1);
+				row = random.nextInt(height-1);
+				System.out.println("zufall: " + col + " " + row);				
+				if(feld[col][height-1 - row].equals(" ")){
+					isFree = true;
+				}
+				if((col == 0 && row == 0) || (col == 1 && row == 1)){
+					isFree = false;
+				}
+			}
+		} 
+		// ab hier greift KI
+		else { 
+			System.out.println("Hier brauchen wir KI^^");
+		}
+		
+
+		System.out.println(col + " " + row);
+		return new Turn(spieler, 0,0, col, height-1 - row);
 	}
 	
 	private void checkWin() {
