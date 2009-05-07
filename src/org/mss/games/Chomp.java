@@ -98,6 +98,7 @@ public class Chomp extends Spiel {
 	}
 
 	private Turn kI(Spieler spieler) {
+		System.out.println("Ich werde mal eine KI");
 		return new Turn(spieler, 0,0,0,0);
 	}
 	
