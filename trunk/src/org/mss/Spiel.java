@@ -9,9 +9,8 @@ import java.util.Iterator;
 public abstract class Spiel extends Spielfeld implements Protokollierbar {
 	protected ArrayList<Spieler> spieler = null;
 	protected boolean track = false;
-	protected ArrayList<Turn> turns = null;
 	protected Spieler[] winner = null;
-	
+//	protected ArrayList<Turn> turns = null;
 	public abstract Turn queryPlayer(Spieler spieler);
 	public abstract Spieler[] spielzug(Turn turn) throws Exception;
 	public abstract Spieler[] runde();
@@ -20,11 +19,12 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 	public Spieler[] durchgang() {
 		boolean error =false;
 		do {
+			error = false;
 			try {
 				spielzug(queryPlayer(nextPlayer()));
 				if (winner != null) {
 					return winner;
-				} 
+				}
 			} catch (Exception e) {
 				error = true;
 				e.printStackTrace();
@@ -32,6 +32,7 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 			}
 		} while (error);
 		do {
+			error = false;
 			try {
 				spielzug(queryPlayer(nextPlayer()));
 				return winner;
@@ -40,6 +41,7 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 				e.printStackTrace();
 				Console.read("Wait a second", 42);
 			}
+			System.out.println(error);
 		} while (error);
 		return winner;
 	}

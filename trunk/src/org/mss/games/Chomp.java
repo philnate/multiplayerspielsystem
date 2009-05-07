@@ -21,7 +21,7 @@ public class Chomp extends Spiel {
 				feld[i][j] = " ";
 			}
 		}
-		this.turns = new ArrayList<Turn>(this.width*this.height/3);
+//		this.turns = new ArrayList<Turn>(this.width*this.height/3);
 	}
 	
 	public Chomp() {
@@ -135,7 +135,7 @@ public class Chomp extends Spiel {
 
 			turns.remove(turns.size()-1);
 			ArrayList<Turn> theTurns = (ArrayList<Turn>) turns.clone();
-			turns = new ArrayList<Turn>(width*height/3);
+			turns.clear();
 			
 			Iterator<Turn> it = theTurns.iterator();
 			while (it.hasNext()) {
