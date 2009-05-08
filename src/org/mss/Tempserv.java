@@ -32,13 +32,13 @@ public class Tempserv {
 			spiel.track(protokol);
 		
 			try {
-				if (Math.random() <= .5) {
+//				if (Math.random() <= .5) {
 					spiel.addPlayer(spieler1);
 					spiel.addPlayer(spieler2);
-				} else {
-					spiel.addPlayer(spieler2);
-					spiel.addPlayer(spieler1);
-				}
+//				} else {
+//					spiel.addPlayer(spieler2);
+//					spiel.addPlayer(spieler1);
+//				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -80,8 +80,8 @@ public class Tempserv {
 	}
 
 	private static void coreQuestions() {
-		vier = (Console.read("1:Viergewinnt;2:Chomp",2)==1)? true:false;
-		comp = (Console.read("Gegen Mensch(1) oder PC(2)",1) ==1)? false:true;
+		vier = (Console.read("1:Viergewinnt;2:Chomp",1)==1)? true:false;
+		comp = (Console.read("Gegen Mensch(1) oder PC(2)",2) ==1)? false:true;
 
 		if (newPlayer) {
 			spieler1 = new Spieler(Console.read("Name Spieler1",""));
@@ -99,6 +99,6 @@ public class Tempserv {
 		System.out.println("Höhe (leer für default):");
 		height = Console.read(0);
 		
-		protokol = Console.read("Protokollieren","ja").contentEquals("nein")? false:true;
+		protokol = Console.read("Protokollieren","ja").contentEquals("ja")? true:false;
 	}
 }
