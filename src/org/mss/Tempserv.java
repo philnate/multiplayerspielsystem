@@ -1,6 +1,5 @@
 package org.mss;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.mss.games.*;
 import org.mss.Spiel;
@@ -33,16 +32,18 @@ public class Tempserv {
 			spiel.track(protokol);
 		
 			try {
-				spiel.addPlayer(spieler1);
-				spiel.addPlayer(spieler2);
+				if (Math.random() <= .5) {
+					spiel.addPlayer(spieler1);
+					spiel.addPlayer(spieler2);
+				} else {
+					spiel.addPlayer(spieler2);
+					spiel.addPlayer(spieler1);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			spiel.displayFeld();
 			Spieler winner[] = spiel.runde();
-//			spiel.listTurns();
-//			spiel.removeTurn();
-//			spiel.displayFeld();
 	
 			if (winner.length == 1) {
 				System.out.println("Gewonnen hat der Spieler:"+winner[0].toString());	
