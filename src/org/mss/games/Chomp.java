@@ -130,12 +130,12 @@ public class Chomp extends Spiel {
 		
 		// zufälliges Feld berechnen und prüfen, ob es schon gesetzt ist
 		// feld[0][0] und feld[1][1] dürfen dabei nicht gesetzt werden
-		if(needKi != true){
+		if(!needKi){
 			while(isFree == false){
 				col = random.nextInt(width-1);
 				row = random.nextInt(height-1);
 				System.out.println("zufall: " + col + " " + row);				
-				if(feld[col][height-1 - row].equals(" ")){
+				if(feld[height-1 - row][col].equals(" ")){
 					isFree = true;
 				}
 				if((col == 0 && row == 0) || (col == 1 && row == 1)){
