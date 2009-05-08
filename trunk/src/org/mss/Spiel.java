@@ -10,7 +10,6 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 	protected ArrayList<Spieler> spieler = null;
 	protected boolean track = false;
 	protected Spieler[] winner = null;
-//	protected ArrayList<Turn> turns = null;
 	public abstract Turn queryPlayer(Spieler spieler);
 	public abstract Spieler[] spielzug(Turn turn) throws Exception;
 	public abstract Spieler[] runde();
