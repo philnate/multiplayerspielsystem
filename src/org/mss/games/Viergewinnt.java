@@ -21,16 +21,10 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 				feld[i][j] = " ";
 			}
 		}
-
+		turns.clear();
 		for (int i = 0; i < this.width; i++) {
 			hoehe[i] = this.height;
 		}
-		//TODO here
-//		feld[5][3] = "X";
-//		feld[4][2] = "X";
-//		feld[3][1] = " ";
-//		feld[2][0] = "X";
-//		hoehe[1] -=2; 
 	}
 
 	public Viergewinnt() {
@@ -58,18 +52,22 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 		}
 		try {
 			if (hoehe[turn.getToX()] > 0) {
+				System.out.println(nextPlayer() +  " "+spieler1);
 				feld[--hoehe[turn.getToX()]][turn.getToX()] = (spieler1)? "X":"O";
 				spieler1 = !spieler1;
 				if (track) {
 					addTurn(turn);
 				}
 			} else {
-				throw new Exception("Maximale Höhe erreicht in dieser Reihe");
+				if (turn.getSpieler().isComp()) {
+					spielzug(kI(turn.getSpieler()));
+				} else {
+					throw new Exception("Maximale Höhe erreicht in dieser Reihe");
+				}
 			}
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw new Exception("Zug liegt nicht im Spielfeld!");
 		}
-		
 		this.displayFeld();
 		//Sobald ein Spieler gewonnen hat wird kein Spieler mehr zurück gegeben
 		checkWin(this.feld);
@@ -89,7 +87,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 	public boolean removeTurn() {
 		if (turns.size() != 0) {
 			Turn turn = turns.get(turns.size()-1);
-			feld[hoehe[turn.getToX()]--][turn.getToX()] = " ";
+			feld[hoehe[turn.getToX()]++][turn.getToX()] = " ";
 			turns.remove(0);
 			return true;
 		} else {
@@ -122,8 +120,8 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 	}
 	
 	private Turn kI(Spieler spieler) {
-		final String player = (spieler1)? "XXXX":"OOOO";
-		final String enemy = (spieler1)? "OOOO":"XXXX";
+		String player = (spieler1)? "XXXX":"OOOO";
+		String enemy = (spieler1)? "OOOO":"XXXX";
 
 		int[] setTo = new int[width];//Wertung für die einzelnen Spalten
 		int curPos;//Tempspeicher für die aktuelle Position des gesuchten Strings
@@ -625,10 +623,17 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 		
 		int take = pos[(int) (Math.random()*possible)];
 		//Prüfen ob Gegner dadurch gewinnen würde
-		String[][] tempfeld = this.feld.clone();
-		if (hoehe[take] < height -3) {
-			tempfeld[hoehe[take]][take] = player.substring(3);
-			tempfeld[hoehe[take]+1][take] = enemy.substring(3);
+		String[][] tempfeld = new String[height][width];
+		for (int a = 0; a < height; a++) {
+			for (int b = 0; b < width; b++) {
+				tempfeld[a][b] = feld[a][b];
+			}
+		}
+
+		if (hoehe[take] > 1) {
+			System.out.println(take);
+			tempfeld[hoehe[take]-1][take] = player.substring(3);
+			tempfeld[hoehe[take]-2][take] = enemy.substring(3);
 			checkWin(tempfeld);
 			if (winner != null && winner.length == 1 && winner[0] != nextPlayer()) {
 				take = (int) ((width-1)*Math.random());
