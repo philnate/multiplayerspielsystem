@@ -22,7 +22,7 @@ public class Chomp extends Spiel {
 				feld[i][j] = " ";
 			}
 		}
-//		this.turns = new ArrayList<Turn>(this.width*this.height/3);
+		turns.clear();
 	}
 	
 	public Chomp() {
@@ -75,15 +75,15 @@ public class Chomp extends Spiel {
 		int col = Console.read(-1);
 		System.out.println("Wähle eine Zeile:");
 		int row = Console.read(-1);
-		return new Turn(spieler, 0,0, col, height-1 - row);
+		return new Turn(spieler, 0,0, col, row);
 	}
 
 	private void setTurn(Turn turn) throws Exception {
 		if ((turn.getToX() < width && turn.getToX() >= 0) 
-				&& (turn.getToY() < height && turn.getToY() >= 0) 
-				&& feld[turn.getToY()][turn.getToX()].contentEquals(" ")) {
+				&& ((height-1 - turn.getToY()) < height && (height-1 - turn.getToY()) >= 0) 
+				&& feld[height-1 - turn.getToY()][turn.getToX()].contentEquals(" ")) {
 			for (int i = turn.getToX(); i < width; i++) {
-				for (int j = turn.getToY(); j < height; j++) {
+				for (int j = height-1 - turn.getToY(); j < height; j++) {
 					if (feld[j][i].contentEquals(" ")) {
 						feld[j][i] = (spieler1)? "X":"O";
 					}
@@ -93,7 +93,6 @@ public class Chomp extends Spiel {
 				addTurn(turn);
 			}
 		} else {
-			System.out.println("Exception");
 			throw new Exception ("Zug liegt nicht im Spielfeld, oder Feld ist bereits belegt!");
 		}
 	}
@@ -254,6 +253,7 @@ public class Chomp extends Spiel {
 			Iterator<Turn> it = theTurns.iterator();
 			while (it.hasNext()) {
 				try {
+					spieler1 = !spieler1;
 					setTurn(it.next());
 				} catch (Exception e) {
 					e.printStackTrace();
