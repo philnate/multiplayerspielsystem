@@ -32,13 +32,13 @@ public class Tempserv {
 			spiel.track(protokol);
 		
 			try {
-//				if (Math.random() <= .5) {
+				if (Math.random() <= .5) {
 					spiel.addPlayer(spieler1);
 					spiel.addPlayer(spieler2);
-//				} else {
-//					spiel.addPlayer(spieler2);
-//					spiel.addPlayer(spieler1);
-//				}
+				} else {
+					spiel.addPlayer(spieler2);
+					spiel.addPlayer(spieler1);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
