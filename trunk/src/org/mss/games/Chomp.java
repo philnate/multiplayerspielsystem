@@ -41,6 +41,8 @@ public class Chomp extends Spiel {
 		}
 		setTurn(turn);
 		spieler1 = !spieler1;
+		displayFeld();
+		checkWin();
 		return winner;
 	}
 	
@@ -48,8 +50,6 @@ public class Chomp extends Spiel {
 	public Spieler[] runde() {
 		while (winner == null) {
 			durchgang();
-			removeTurn();
-			displayFeld();
 		}
 		return winner;
 	}
