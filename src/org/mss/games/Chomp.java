@@ -41,8 +41,6 @@ public class Chomp extends Spiel {
 		}
 		setTurn(turn);
 		spieler1 = !spieler1;
-		displayFeld();
-		checkWin();
 		return winner;
 	}
 	
@@ -50,6 +48,8 @@ public class Chomp extends Spiel {
 	public Spieler[] runde() {
 		while (winner == null) {
 			durchgang();
+			removeTurn();
+			displayFeld();
 		}
 		return winner;
 	}
@@ -251,10 +251,11 @@ public class Chomp extends Spiel {
 			turns.clear();
 			
 			Iterator<Turn> it = theTurns.iterator();
+			spieler1 = true;
 			while (it.hasNext()) {
 				try {
-					spieler1 = !spieler1;
 					setTurn(it.next());
+					spieler1 = !spieler1;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
