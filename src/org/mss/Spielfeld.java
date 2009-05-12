@@ -14,7 +14,7 @@ public abstract class Spielfeld {
 	public Spielfeld(int width, int height) {
 		this.width = width;
 		this.height = height;
-		feld = new String[width][height];
+		feld = new String[height][width];
 	}
 
 	public int getHeight() {
