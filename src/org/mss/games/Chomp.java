@@ -103,7 +103,8 @@ public class Chomp extends Spiel {
 		boolean isFree = false;
 		int col = 0;
 		int row = 0;
-		Random random = new Random();
+		Random random = new Random();		
+	
 		
 		// TODO vielleicht anders, indem man prüft, ob "unterhalb" noch was frei ist und nicht
 		//      "oberhalb" was gesetzt
@@ -143,7 +144,44 @@ public class Chomp extends Spiel {
 			}
 		} 
 		// ab hier greift KI
-		else { 	
+		else { 		
+			
+			int set = 0;
+			int direction = 0; // 0 = horizontal; 1 = vertical;
+			
+			for(int i = 0; i < width; i++){
+				if(!feld[i][0].equals(" ")){
+					set = i;
+					break;
+				}
+			}
+		
+			System.out.println("set 1: " + set);
+			for(int i = 0; i < height; i++){
+				if(!feld[0][i].equals(" ")){
+					if(i < set){
+						set = i;
+						direction = 1;
+						break;
+					}
+				}
+			}
+		
+			if(set != 0){
+				if(direction == 0){
+					col = set;
+					row = width-1;
+				} else {
+					col = 0;
+					row = height - 1 - set;
+				}
+				
+			}
+			
+			// wenn feld[1][1] besetzt, markiere linkes unterstes Feld
+			if(!feld[1][1].equals(" ")){
+				return new Turn(spieler, 0,0, 0, height-1);
+			}
 			
 			// wenn in 2. Reihe ein Feld besetzt, besetze 2. Reihe außer die beiden linken Felder 
 			if(feld[1][2].equals(" ")){
@@ -167,45 +205,7 @@ public class Chomp extends Spiel {
 						break;
 					}
 				}
-			}
-			
-			// wenn feld[1][1] besetzt, markiere linkes unterstes Feld
-			if(!feld[1][1].equals(" ")){
-				col = 0;
-				row = 0;
-			}
-			
-			
-			int set = 0;
-			int direction = 0; // 0 = horizontal; 1 = vertical;
-			
-			for(int i = 0; i < width; i++){
-				if(!feld[i][0].equals(" ")){
-					set = i;
-					break;
-				}
-			}
-
-			System.out.println("set 1: " + set);
-			for(int i = 0; i < height; i++){
-				if(!feld[0][i].equals(" ")){
-					if(i < set){
-						set = i;
-						direction = 1;
-						break;
-					}
-				}
-			}
-			
-			if(set != 0){
-				if(direction == 0){
-					col = set;
-					row = width-1;
-				} else {
-					col = 0;
-					row = height - 1 - set;
-				}
-			}
+			}	
 				
 			
 		}
