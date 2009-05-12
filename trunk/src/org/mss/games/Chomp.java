@@ -103,12 +103,10 @@ public class Chomp extends Spiel {
 		boolean isFree = false;
 		int col = 0;
 		int row = 0;
-		Random random = new Random();		
-	
+		Random random = new Random();			
 		
 		// TODO vielleicht anders, indem man prüft, ob "unterhalb" noch was frei ist und nicht
-		//      "oberhalb" was gesetzt
-		
+		//      "oberhalb" was gesetzt	
 		
 		// prüfen, ob in den ersten beiden Reihen schon was gesetzt ist
 		for(int i = 0; i < 2; i++){
@@ -132,8 +130,8 @@ public class Chomp extends Spiel {
 		// feld[0][0] und feld[1][1] dürfen dabei nicht gesetzt werden
 		if(!needKi){
 			while(isFree == false){
-				col = random.nextInt(width-1);
-				row = random.nextInt(height-1);
+				col = random.nextInt(width-2)+1;
+				row = random.nextInt(height-2)+1;
 				System.out.println("zufall: " + col + " " + row);				
 				if(feld[height-1 - row][col].equals(" ")){
 					isFree = true;
@@ -142,47 +140,64 @@ public class Chomp extends Spiel {
 					isFree = false;
 				}
 			}
+			return new Turn(spieler, 0,0, col, row);
 		} 
 		// ab hier greift KI
 		else { 		
 			
 			int set = 0;
+			boolean equal = false;
 			int direction = 0; // 0 = horizontal; 1 = vertical;
 			
-			for(int i = 0; i < width; i++){
-				if(!feld[i][0].equals(" ")){
-					set = i;
-					break;
-				}
-			}
-		
-			System.out.println("set 1: " + set);
-			for(int i = 0; i < height; i++){
-				if(!feld[0][i].equals(" ")){
-					if(i < set){
+			//wenn alle Felder besetzt, markiere letztes Feld (oben links)
+			if(!feld[0][1].equals(" ") && !feld[1][0].equals(" ")){
+				
+				System.out.println("letztes Feld");
+				return new Turn(spieler, 0,0, 0, height-1);
+				
+			} else if(feld[height-1][0].equals(" ") && feld[0][width-1].equals(" ")){//und oberste Spalte und linkeste Reihe frei, markiere Feld links unten
+				System.out.println("unten links");
+				return new Turn(spieler, 0,0, 0, 0);					
+			} else {//sonst suche, ob oberste Reihe oder linke Spalte näher am "Nullpunkt" ist
+				
+				for(int i = 0; i < width; i++){
+					if(!feld[i][0].equals(" ")){
 						set = i;
-						direction = 1;
 						break;
 					}
 				}
-			}
-		
-			if(set != 0){
-				if(direction == 0){
-					col = set;
-					row = width-1;
-				} else {
-					col = 0;
-					row = height - 1 - set;
-				}
 				
+				for(int i = 0; i < height; i++){
+					if(!feld[0][i].equals(" ")){
+						if(i < set){
+							set = i;
+							direction = 1;
+							break;
+						} else if (i == set){
+							equal = true;
+						}
+					}
+				}
+				System.out.println(direction + " 0 = oben; 1 = links");
+				//und gleiche aus
+				if(!equal){
+					System.out.println("ausgleich; set: " + set);
+					if(set != 0){
+						if(direction == 0){
+							col = set;
+							row = width-1;
+						} else {
+							col = 0;
+							row = height - 1 - set;
+						}
+					}
+					System.out.println(col + " " + row);
+					return new Turn(spieler, 0,0, col, row);
+				} else {//sonst setze linke Spalte eins weiter nach oben
+					System.out.println("eins weiter nach oben");
+					return new Turn(spieler, 0,0, 0, height-1 - set+1);
+				}						
 			}
-			
-			// wenn feld[1][1] besetzt, markiere linkes unterstes Feld
-			if(!feld[1][1].equals(" ")){
-				return new Turn(spieler, 0,0, 0, height-1);
-			}
-			
 			// wenn in 2. Reihe ein Feld besetzt, besetze 2. Reihe außer die beiden linken Felder 
 			if(feld[1][2].equals(" ")){
 				for(int j = 2; j < feld.length; j++){
@@ -205,15 +220,16 @@ public class Chomp extends Spiel {
 						break;
 					}
 				}
-			}	
-				
-			
-		}
-		
-
-		System.out.println(col + " " + row);
-		return new Turn(spieler, 0,0, col, height-1 - row);
+			}
+			System.out.println(col + " " + row);
+			return new Turn(spieler, 0,0, col, height-1 - row);			
+		}		
 	}
+		
+	
+			
+		
+	
 	
 	private void checkWin() {
 		switch (feld[0][0].charAt(0)) {
