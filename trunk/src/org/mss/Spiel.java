@@ -62,7 +62,9 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 	public void track(boolean track) {
 		this.track = track;
 	}
+	
 	public void addTurn(Turn turn) {
+		System.out.println(turn.toString());
 		turns.add(turn);
 	}
 
