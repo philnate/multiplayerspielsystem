@@ -14,6 +14,12 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 	public Viergewinnt(int width, int height) {
 		this.width = (width > 0)? width:-width;
 		this.height = (height > 0)? height:-height;
+		if (this.width < 4) {
+			this.width = 4;
+		}
+		if (this.height < 4) {
+			this.height = 4;
+		}
 		hoehe = new int[this.width];
 		feld = new String[this.height][this.width];
 		for (int i = 0; i < this.height; i++) {
