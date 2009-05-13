@@ -6,7 +6,16 @@ import java.io.InputStreamReader;
 
 public final class Console {
 	private static BufferedReader cons = new BufferedReader(new InputStreamReader(System.in));
+	private static boolean debug = true;
 	
+	public static boolean isDebug() {
+		return debug;
+	}
+
+	public static void setDebug(boolean debug) {
+		Console.debug = debug;
+	}
+
 	public static String read(String def) {
 		return read("", def);
 	}
@@ -55,4 +64,13 @@ public final class Console {
 		return read("", def);
 	}
 	
+	public static void write(String text) {
+		System.out.println(text);
+	}
+	
+	public static void debug(String text) {
+		if (debug) {
+			write("Debug: "+ text);
+		}
+	}
 }

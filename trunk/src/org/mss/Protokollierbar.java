@@ -1,4 +1,5 @@
 package org.mss;
+
 import java.util.ArrayList;
 
 import org.mss.types.Turn;

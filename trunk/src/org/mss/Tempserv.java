@@ -1,4 +1,5 @@
 package org.mss;
+
 import java.io.IOException;
 
 import org.mss.games.*;
@@ -20,6 +21,7 @@ public class Tempserv {
 	static boolean nextGame = false;
 
 	public static void main(String[] args) throws IOException{
+		Console.setDebug(false);
 		abfragen();
 		do {
 			Spiel spiel = null;
@@ -80,12 +82,12 @@ public class Tempserv {
 	}
 
 	private static void coreQuestions() {
-		vier = (Console.read("1:Viergewinnt;2:Chomp",1)==1)? true:false;
+		vier = (Console.read("1:Viergewinnt;2:Chomp",2)==1)? true:false;
 		comp = (Console.read("Gegen Mensch(1) oder PC(2)",2) ==1)? false:true;
 
 		if (newPlayer) {
 			spieler1 = new Spieler(Console.read("Name Spieler1",""));
-			
+			//spieler1 = new Spieler();
 			if (!comp) {
 				spieler2 = new Spieler(Console.read("Name Spieler2",""));
 			} else {

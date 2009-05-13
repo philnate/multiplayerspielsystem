@@ -1,4 +1,5 @@
 package org.mss;
+
 import org.mss.Spieler;
 import org.mss.types.Turn;
 import org.mss.utils.Console;
@@ -40,7 +41,6 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 				e.printStackTrace();
 				Console.read("Wait a second", 42);
 			}
-			System.out.println(error);
 		} while (error);
 		return winner;
 	}

@@ -1,4 +1,5 @@
 package org.mss.types;
+
 import org.mss.Spieler;
 
 public class Turn {
