@@ -1,4 +1,5 @@
 package org.mss.games;
+
 import org.mss.Spiel;
 import org.mss.types.Turn;
 import org.mss.Spieler;
@@ -9,7 +10,6 @@ import org.mss.utils.Console;
 public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 	private boolean spieler1 = true;
 	private int[] hoehe;
-
 
 	public Viergewinnt(int width, int height) {
 		this.width = (width > 0)? width:-width;
@@ -52,25 +52,23 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 		}
 		try {
 			if (hoehe[turn.getToX()] > 0) {
-				System.out.println(nextPlayer() +  " "+spieler1);
 				feld[--hoehe[turn.getToX()]][turn.getToX()] = (spieler1)? "X":"O";
 				spieler1 = !spieler1;
 				if (track) {
 					addTurn(turn);
 				}
+				this.displayFeld();
+				checkWin(this.feld);
 			} else {
 				if (turn.getSpieler().isComp()) {
 					spielzug(kI(turn.getSpieler()));
 				} else {
-					throw new Exception("Maximale Höhe erreicht in dieser Reihe");
+					throw new Exception("Maximale Höhe in dieser Reihe erreicht!");
 				}
 			}
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw new Exception("Zug liegt nicht im Spielfeld!");
 		}
-		this.displayFeld();
-		//Sobald ein Spieler gewonnen hat wird kein Spieler mehr zurück gegeben
-		checkWin(this.feld);
 		return winner;
 	}
 	
@@ -94,6 +92,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 			return false;
 		}
 	}
+	
 	public Spieler nextPlayer() {
 		if (spieler1) {
 			return spieler.get(0);
@@ -123,6 +122,12 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 		String player = (spieler1)? "XXXX":"OOOO";
 		String enemy = (spieler1)? "OOOO":"XXXX";
 
+		try {
+			Thread.sleep((long) (Math.random()*100000)/100 + 500);
+			//Computer überlegt
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		int[] setTo = new int[width];//Wertung für die einzelnen Spalten
 		int curPos;//Tempspeicher für die aktuelle Position des gesuchten Strings
 		String check = "";
@@ -133,7 +138,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 				check += feld[j][i];
 			}
 		//->Eigene Gewinnchancen prüfen
-			//Prüfen ob irgendwo 4 Vertikal gemacht werden kann, mit 5% wird das jedoch übersehn
+			//Prüfen ob irgendwo 4 Vertikal möglich
 			if (check.indexOf(" " +player.substring(1)) != -1 && (Math.random() < .95)) {
 				setTo[i] += 100;
 			}
@@ -175,6 +180,17 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 					setTo[curPos+3] += 100;
 				}
 			}
+			
+			//Prüfen auf _??_
+			if ((curPos = check.indexOf(" " + player.substring(2) + " ")) != -1 && Math.random() < 0.7) {
+				if (hoehe[curPos]-1 == j) {
+					setTo[curPos] += 50;
+				}
+				if (hoehe[curPos+3]-1 == j) {
+					setTo[curPos+3] += 50;
+				}
+			}
+			
 			//Prüfen auf ?_??
 			if (((curPos = check.indexOf(player.substring(3) + " " + player.substring(2))) != -1)) {
 				if (hoehe[curPos+1]-1 == j && (Math.random() < .95)) {
@@ -223,13 +239,13 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 			//Prüfen auf _???
 			if (((curPos = check.indexOf(" " + enemy.substring(1))) != -1)) {
 				if (hoehe[curPos]-1 == j && (Math.random() < .95)) {
-					setTo[curPos] += 100;
+					setTo[curPos] += 90;
 				}
 			}
 			//Prüfen auf ???_
 			if (((curPos = check.indexOf(enemy.substring(1) + " ")) != -1)) {
 				if (hoehe[curPos+3]-1 == j && (Math.random() < .95)) {
-					setTo[curPos+3] += 100;
+					setTo[curPos+3] += 90;
 				}
 			}
 			
@@ -238,8 +254,8 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 				if (hoehe[curPos]-1 == j) {
 					setTo[curPos] += 20;
 				}
-				if (hoehe[curPos+4]-1 == j) {
-					setTo[curPos+4] += 20;
+				if (hoehe[curPos+3]-1 == j) {
+					setTo[curPos+3] += 20;
 				}
 			}
 			
@@ -266,174 +282,174 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 		}
 
 		//-> /-Diagonale Prüfen
-		String toCheck = "";
+		check = "";
 		// /-Diagonalen bestimmen
 		for (int i = 0; i < width; i++) {
 			int j = 0;
 			int temp = i;
 			while (temp >= 0 && j < height) {
-				toCheck += feld[j][temp];
+				check += feld[j][temp];
 				j++;
 				temp--;
 			}
 			//Gegner behindern
 			//Prüfen auf ???_
-			if ((curPos = toCheck.indexOf(" " + enemy.substring(1))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(" " + enemy.substring(1))) != -1 && Math.random() < .95) {
 				if (hoehe[i-curPos] == height - curPos -1 ) {
 					setTo[i-curPos] +=90;
 				}
 			}
 			//Prüfen auf ??_
-			if ((curPos = toCheck.indexOf(" " + enemy.substring(2))) != -1 && Math.random() < .5) {
+			if ((curPos = check.indexOf(" " + enemy.substring(2))) != -1 && Math.random() < .5) {
 				if (hoehe[i-curPos] == height - curPos -1 ) {
 					setTo[i-curPos] +=20;
 				}
 			}
 			//Prüfen auf _???
-			if ((curPos = toCheck.indexOf(enemy.substring(1) + " ")) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(enemy.substring(1) + " ")) != -1 && Math.random() < .95) {
 				if (hoehe[i-curPos-3] == curPos + 3 + 1) {
 					setTo[i-curPos-3] +=90;
 				}
 			}
 			//Prüfen auf ?_??
-			if (((curPos = toCheck.indexOf(enemy.substring(2) + " " + enemy.substring(3))) != -1 && Math.random() < .95)) {
+			if (((curPos = check.indexOf(enemy.substring(2) + " " + enemy.substring(3))) != -1 && Math.random() < .95)) {
 				if (hoehe[i-curPos-2] == curPos + 2 + 1) {
 					setTo[i-curPos-2] +=90;
 				}
 			}
 			//Prüfen auf ??_?
-			if (((curPos = toCheck.indexOf(enemy.substring(3) + " " + enemy.substring(2))) != -1 && Math.random() < .95)) {
+			if (((curPos = check.indexOf(enemy.substring(3) + " " + enemy.substring(2))) != -1 && Math.random() < .95)) {
 				if (hoehe[i-curPos-1] == curPos + 1 + 1) {
 					setTo[i-curPos-1] +=90;
 				}
 			}
 			//Prüfen auf _??
-			if ((curPos = toCheck.indexOf(enemy.substring(2) + " ")) != -1 && Math.random() < .5) {
+			if ((curPos = check.indexOf(enemy.substring(2) + " ")) != -1 && Math.random() < .5) {
 				if (hoehe[i-curPos-2] == curPos + 2 + 1) {
 					setTo[i-curPos-2] +=20;
 				}
 			}
 
 			//Selber gewinnen
-			if ((curPos = toCheck.indexOf(" " + player.substring(1))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(" " + player.substring(1))) != -1 && Math.random() < .95) {
 				if (hoehe[i-curPos] == height - curPos -1 ) {
 					setTo[i-curPos] +=100;
 				}
 			}
 			//Prüfen auf ??_
-			if ((curPos = toCheck.indexOf(" " + player.substring(2))) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(" " + player.substring(2))) != -1 && Math.random() < .8) {
 				if (hoehe[i-curPos] == height - curPos -1 ) {
 					setTo[i-curPos] +=50;
 				}
 			}
 			//Prüfen auf _???
-			if ((curPos = toCheck.indexOf(player.substring(1) + " ")) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(player.substring(1) + " ")) != -1 && Math.random() < .95) {
 				if (hoehe[i-curPos-3] == curPos + 3 + 1) {
 					setTo[i-curPos-3] +=100;
 				}
 			}
 			//Prüfen auf ?_??
-			if (((curPos = toCheck.indexOf(player.substring(2) + " " + player.substring(3))) != -1 && Math.random() < .95)) {
+			if (((curPos = check.indexOf(player.substring(2) + " " + player.substring(3))) != -1 && Math.random() < .95)) {
 				if (hoehe[i-curPos-2] == curPos + 2 + 1) {
 					setTo[i-curPos-2] +=100;
 				}
 			}
 			//Prüfen auf ??_?
-			if (((curPos = toCheck.indexOf(player.substring(3) + " " + player.substring(2))) != -1 && Math.random() < .95)) {
+			if (((curPos = check.indexOf(player.substring(3) + " " + player.substring(2))) != -1 && Math.random() < .95)) {
 				if (hoehe[i-curPos-1] == curPos + 1 + 1) {
 					setTo[i-curPos-1] +=100;
 				}
 			}
 			//Prüfen auf _??
-			if ((curPos = toCheck.indexOf(player.substring(2) + " ")) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(player.substring(2) + " ")) != -1 && Math.random() < .8) {
 				if (hoehe[i-curPos-2] == curPos + 2 + 1) {
 					setTo[i-curPos-2] +=50;
 				}
 			}
-			toCheck = ""; 
+			check = ""; 
 		}
 		//untere  /-Diagonalen
 		for (int j = 1; j < height; j++) {
 			int i = width-1;
 			int temp = j;
 			while (i >= 0 && temp < height) {
-				toCheck += feld[temp++][i--];
+				check += feld[temp++][i--];
 			}
 			//Gegner behindern
 			//Prüfen auf ???_
-			if ((curPos = toCheck.indexOf(" " + enemy.substring(1))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(" " + enemy.substring(1))) != -1 && Math.random() < .95) {
 				if (hoehe[width-1-curPos] == j + curPos +1 ) {
 					setTo[width-1-curPos] +=90;
 				}
 			}
 			//Prüfen auf ??_
-			if ((curPos = toCheck.indexOf(" " + enemy.substring(2))) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(" " + enemy.substring(2))) != -1 && Math.random() < .8) {
 				if (hoehe[width-1-curPos] == j + curPos +1 ) {
 					setTo[width-1-curPos] +=20;
 				}
 			}
 			//Prüfen auf _???
-			if ((curPos = toCheck.indexOf(enemy.substring(1) + " ")) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(enemy.substring(1) + " ")) != -1 && Math.random() < .95) {
 				if (hoehe[width-1-curPos-3] == j + curPos + 3 + 1 ) {
 					setTo[width-1-curPos-3] +=90;
 				}
 			}
 			//Prüfen auf _??
-			if ((curPos = toCheck.indexOf(enemy.substring(2) + " ")) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(enemy.substring(2) + " ")) != -1 && Math.random() < .8) {
 				if (hoehe[width-1-curPos-2] == j + curPos + 2 + 1 ) {
 					setTo[width-1-curPos-2] +=20;
 				}
 			}
 			//Prüfen auf ?_??
-			if ((curPos = toCheck.indexOf(enemy.substring(2) + " " + enemy.substring(3))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(enemy.substring(2) + " " + enemy.substring(3))) != -1 && Math.random() < .95) {
 				if (hoehe[width-1-curPos-2] == j + curPos + 2 + 1 ) {
 					setTo[width-1-curPos-2] +=90;
 				}
 			}
 			//Prüfen auf _???
-			if ((curPos = toCheck.indexOf(enemy.substring(3) + " " + enemy.substring(2))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(enemy.substring(3) + " " + enemy.substring(2))) != -1 && Math.random() < .95) {
 				if (hoehe[width-1-curPos-1] == j + curPos + 1 + 1 ) {
 					setTo[width-1-curPos-1] +=90;
 				}
 			}
 			//Eigene Gewinnchancen
 			//Prüfen auf ???_
-			if ((curPos = toCheck.indexOf(" " + player.substring(1))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(" " + player.substring(1))) != -1 && Math.random() < .95) {
 				if (hoehe[width-1-curPos] == j + curPos +1 ) {
 					setTo[width-1-curPos] +=90;
 				}
 			}
 			//Prüfen auf ??_
-			if ((curPos = toCheck.indexOf(" " + player.substring(2))) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(" " + player.substring(2))) != -1 && Math.random() < .8) {
 				if (hoehe[width-1-curPos] == j + curPos +1 ) {
 					setTo[width-1-curPos] +=50;
 				}
 			}
 			//Prüfen auf _???
-			if ((curPos = toCheck.indexOf(player.substring(1) + " ")) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(player.substring(1) + " ")) != -1 && Math.random() < .95) {
 				if (hoehe[width-1-curPos-3] == j + curPos + 3 + 1 ) {
 					setTo[width-1-curPos-3] +=100;
 				}
 			}
 			//Prüfen auf _??
-			if ((curPos = toCheck.indexOf(player.substring(2) + " ")) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(player.substring(2) + " ")) != -1 && Math.random() < .8) {
 				if (hoehe[width-1-curPos-2] == j + curPos + 2 + 1 ) {
 					setTo[width-1-curPos-2] +=50;
 				}
 			}
 			//Prüfen auf ?_??
-			if ((curPos = toCheck.indexOf(player.substring(2) + " " + player.substring(3))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(player.substring(2) + " " + player.substring(3))) != -1 && Math.random() < .95) {
 				if (hoehe[width-1-curPos-2] == j + curPos + 2 + 1 ) {
 					setTo[width-1-curPos-2] +=100;
 				}
 			}
 			//Prüfen auf _???
-			if ((curPos = toCheck.indexOf(player.substring(3) + " " + player.substring(2))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(player.substring(3) + " " + player.substring(2))) != -1 && Math.random() < .95) {
 				if (hoehe[width-1-curPos-1] == j + curPos + 1 + 1 ) {
 					setTo[width-1-curPos-1] +=100;
 				}
 			}
-			toCheck = "";
+			check = "";
 		}
 		
 		// \-Diagonalen bestimmen
@@ -441,85 +457,85 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 			int j = 0;
 			int temp = i;
 			while (temp < width) {
-				toCheck += feld[j][temp];
+				check += feld[j][temp];
 				j++;
 				temp++;
 			} 
 			//Gegner behindern
 			//Prüfen auf _???
-			if ((curPos = toCheck.indexOf(" " + enemy.substring(1))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(" " + enemy.substring(1))) != -1 && Math.random() < .95) {
 				if (hoehe[i+curPos] == height-curPos -1) {
 					setTo[i+curPos] += 90;
 				}
 			}
 			//Prüfen auf _??
-			if ((curPos = toCheck.indexOf(" " + enemy.substring(2))) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(" " + enemy.substring(2))) != -1 && Math.random() < .8) {
 				if (hoehe[i+curPos] == height-curPos -1) {
 					setTo[i+curPos] += 20;
 				}
 			}
 			//Prüfen auf ??_
-			if ((curPos = toCheck.indexOf(enemy.substring(2) + " ")) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(enemy.substring(2) + " ")) != -1 && Math.random() < .8) {
 				if (hoehe[i+curPos+2] == curPos +2+1) {
 					setTo[i+curPos+2] += 20;
 				}
 			}
 			//Prüfen auf ??_? 
-			if ((curPos = toCheck.indexOf(enemy.substring(2) + " " + enemy.substring(3))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(enemy.substring(2) + " " + enemy.substring(3))) != -1 && Math.random() < .95) {
 				if (hoehe[i+curPos+2] == curPos +2+1) {
 					setTo[i+curPos+2] += 90;
 				}
 			}
 			//Prüfen auf ?_?? 
-			if ((curPos = toCheck.indexOf(enemy.substring(3) + " " + enemy.substring(1))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(enemy.substring(3) + " " + enemy.substring(1))) != -1 && Math.random() < .95) {
 				if (hoehe[i+curPos+1] == curPos +1+1) {
 					setTo[i+curPos+1] += 90;
 				}
 			}
 			//Prüfen auf ???_ 
-			if ((curPos = toCheck.indexOf(enemy.substring(1) + " ")) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(enemy.substring(1) + " ")) != -1 && Math.random() < .95) {
 				if (hoehe[i+curPos+3] == curPos +3+1) {
 					setTo[i+curPos+3] += 90;
 				}
 			}
 			//Eigene Gewinnchancen
 			//Prüfen auf _???
-			if ((curPos = toCheck.indexOf(" " + player.substring(1))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(" " + player.substring(1))) != -1 && Math.random() < .95) {
 				if (hoehe[i+curPos] == height-curPos -1) {
 					setTo[i+curPos] += 100;
 				}
 			}
 			//Prüfen auf _??
-			if ((curPos = toCheck.indexOf(" " + player.substring(2))) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(" " + player.substring(2))) != -1 && Math.random() < .8) {
 				if (hoehe[i+curPos] == height-curPos -1) {
 					setTo[i+curPos] += 50;
 				}
 			}
 			//Prüfen auf ??_
-			if ((curPos = toCheck.indexOf(player.substring(2) + " ")) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(player.substring(2) + " ")) != -1 && Math.random() < .8) {
 				if (hoehe[i+curPos+2] == curPos +2+1) {
 					setTo[i+curPos+2] += 50;
 				}
 			}
 			//Prüfen auf ??_? 
-			if ((curPos = toCheck.indexOf(player.substring(2) + " " + player.substring(3))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(player.substring(2) + " " + player.substring(3))) != -1 && Math.random() < .95) {
 				if (hoehe[i+curPos+2] == curPos +2+1) {
 					setTo[i+curPos+2] += 100;
 				}
 			}
 			//Prüfen auf ?_?? 
-			if ((curPos = toCheck.indexOf(player.substring(3) + " " + player.substring(1))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(player.substring(3) + " " + player.substring(1))) != -1 && Math.random() < .95) {
 				if (hoehe[i+curPos+1] == curPos +1+1) {
 					setTo[i+curPos+1] += 100;
 				}
 			}
 			//Prüfen auf ???_ 
-			if ((curPos = toCheck.indexOf(player.substring(1) + " ")) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(player.substring(1) + " ")) != -1 && Math.random() < .95) {
 				if (hoehe[i+curPos+3] == curPos +3+1) {
 					setTo[i+curPos+3] += 100;
 				}
 			}
-			toCheck = "";
+			check = "";
 		}
 		//untere \-Diagonalen
 		for (int j = 0; j < height; j++) {
@@ -527,92 +543,92 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 			int temp = j;
 			
 			while (i < width && temp < height) {
-				toCheck += feld[temp][i];
+				check += feld[temp][i];
 				i++;
 				temp++;
 			}
 			//Gegner behindern
 			//Prüfen auf ???_
-			if ((curPos = toCheck.indexOf(enemy.substring(1) + " ")) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(enemy.substring(1) + " ")) != -1 && Math.random() < .95) {
 				if (hoehe[curPos+3] == j+curPos +3 +1) {
 					setTo[curPos+3] += 90;
 				}
 			}
 			//Prüfen auf ??_
-			if ((curPos = toCheck.indexOf(enemy.substring(2) + " ")) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(enemy.substring(2) + " ")) != -1 && Math.random() < .8) {
 				if (hoehe[curPos+2] == j+curPos +2 +1) {
 					setTo[curPos+2] += 20;
 				}
 			}
 			//Prüfen auf _???
-			if ((curPos = toCheck.indexOf(" " + enemy.substring(1))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(" " + enemy.substring(1))) != -1 && Math.random() < .95) {
 				if (hoehe[curPos] == j+curPos +1) {
 					setTo[curPos] += 90;
 				}
 			}
 			//Prüfen auf _??
-			if ((curPos = toCheck.indexOf(" " + enemy.substring(2))) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(" " + enemy.substring(2))) != -1 && Math.random() < .8) {
 				if (hoehe[curPos] == j+curPos +1) {
 					setTo[curPos] += 20;
 				}
 			}
 			//Prüfen auf ?_??
-			if ((curPos = toCheck.indexOf(enemy.substring(3) + " " + enemy.substring(2))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(enemy.substring(3) + " " + enemy.substring(2))) != -1 && Math.random() < .95) {
 				if (hoehe[curPos+1] == j+curPos +1 +1) {
 					setTo[curPos+1] += 90;
 				}
 			}
 			//Prüfen auf ?_??
-			if ((curPos = toCheck.indexOf(enemy.substring(2) + " " + enemy.substring(3))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(enemy.substring(2) + " " + enemy.substring(3))) != -1 && Math.random() < .95) {
 				if (hoehe[curPos+2] == j+curPos +2 +1) {
 					setTo[curPos+2] += 90;
 				}
 			}
 			//Eigene Gewinnchancen
 			//Prüfen auf ???_
-			if ((curPos = toCheck.indexOf(player.substring(1) + " ")) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(player.substring(1) + " ")) != -1 && Math.random() < .95) {
 				if (hoehe[curPos+3] == j+curPos +3 +1) {
 					setTo[curPos+3] += 90;
 				}
 			}
 			//Prüfen auf ??_
-			if ((curPos = toCheck.indexOf(player.substring(2) + " ")) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(player.substring(2) + " ")) != -1 && Math.random() < .8) {
 				if (hoehe[curPos+2] == j+curPos +2 +1) {
 					setTo[curPos+2] += 20;
 				}
 			}
 			//Prüfen auf _???
-			if ((curPos = toCheck.indexOf(" " + player.substring(1))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(" " + player.substring(1))) != -1 && Math.random() < .95) {
 				if (hoehe[curPos] == j+curPos +1) {
 					setTo[curPos] += 90;
 				}
 			}
 			//Prüfen auf _??
-			if ((curPos = toCheck.indexOf(" " + player.substring(2))) != -1 && Math.random() < .8) {
+			if ((curPos = check.indexOf(" " + player.substring(2))) != -1 && Math.random() < .8) {
 				if (hoehe[curPos] == j+curPos +1) {
 					setTo[curPos] += 20;
 				}
 			}
 			//Prüfen auf ?_??
-			if ((curPos = toCheck.indexOf(player.substring(3) + " " + player.substring(2))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(player.substring(3) + " " + player.substring(2))) != -1 && Math.random() < .95) {
 				if (hoehe[curPos+1] == j+curPos +1 +1) {
 					setTo[curPos+1] += 90;
 				}
 			}
 			//Prüfen auf ?_??
-			if ((curPos = toCheck.indexOf(player.substring(2) + " " + player.substring(3))) != -1 && Math.random() < .95) {
+			if ((curPos = check.indexOf(player.substring(2) + " " + player.substring(3))) != -1 && Math.random() < .95) {
 				if (hoehe[curPos+2] == j+curPos +2 +1) {
 					setTo[curPos+2] += 90;
 				}
 			}
-			toCheck = "";
+			check = "";
 		}
 		
 		int maxVal = 0;
 		for (int i = 0; i < width; i++) {
 			maxVal = (maxVal < setTo[i])? setTo[i]:maxVal;
 		}
-		System.out.println("maxWertung:"+maxVal);
+		Console.debug("maxWertung:"+maxVal);
 		int[] pos = new int[width];//Felder welche ausgewählt werden sollten
 		int possible = 0;//Zahl der Felder zum auswählen
 		for (int i = 0; i < width; i++) {
@@ -631,17 +647,17 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 		}
 
 		if (hoehe[take] > 1) {
-			System.out.println(take);
+			//System.out.println(take);
 			tempfeld[hoehe[take]-1][take] = player.substring(3);
 			tempfeld[hoehe[take]-2][take] = enemy.substring(3);
 			checkWin(tempfeld);
 			if (winner != null && winner.length == 1 && winner[0] != nextPlayer()) {
 				take = (int) ((width-1)*Math.random());
-				System.out.println("Feld Zufällig wählen Gegner gewinnt sonst");
+				Console.debug("Feld Zufällig wählen Gegner gewinnt sonst");
 			}
 			winner = null;
 		}
-		System.out.println("Position zum Setzen:"+take);
+		Console.debug("Position zum Setzen:"+take);
 		return new Turn(spieler,0, 0, take,0);
 	}
 	
