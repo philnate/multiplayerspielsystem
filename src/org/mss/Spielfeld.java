@@ -1,27 +1,27 @@
 package org.mss;
 
 public abstract class Spielfeld {
-	public int height;
-	public int width;
+	public int hoehe;
+	public int breite;
 	public String[][] feld = null;
 	
-	public abstract void displayFeld();
+	public abstract void zeigeFeld();
 	
 	public Spielfeld() {
 		this(10, 10);
 	}
 	
-	public Spielfeld(int width, int height) {
-		this.width = width;
-		this.height = height;
-		feld = new String[height][width];
+	public Spielfeld(int breite, int hoehe) {
+		this.breite = breite;
+		this.hoehe = hoehe;
+		feld = new String[hoehe][breite];
 	}
 
-	public int getHeight() {
-		return height;
+	public int getHoehe() {
+		return hoehe;
 	}
 
-	public int getWidth() {
-		return width;
+	public int getBreite() {
+		return breite;
 	}
 }
