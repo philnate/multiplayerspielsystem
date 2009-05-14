@@ -55,10 +55,6 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 		return spieler;
 	}
 
-	public Spiel() {
-		spieler = new ArrayList<Spieler>(2);
-	}
-	
 	public void track(boolean track) {
 		this.track = track;
 	}
