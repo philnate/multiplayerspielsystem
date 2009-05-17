@@ -4,6 +4,7 @@ import org.mss.Spiel;
 import org.mss.types.Zug;
 import org.mss.Spieler;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import org.mss.utils.Console;
 
@@ -27,7 +28,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 				feld[i][j] = " ";
 			}
 		}
-		zuege.clear();
+		zuege = new ArrayList<Zug>(hoehe*breite/2);
 		for (int i = 0; i < this.breite; i++) {
 			freieFelder[i] = this.hoehe;
 		}
