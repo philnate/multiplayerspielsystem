@@ -27,7 +27,7 @@ public class Chomp extends Spiel {
 				feld[i][j] = " ";
 			}
 		}
-		zuege.clear();
+		zuege = new ArrayList<Zug>(breite*hoehe/4);
 	}
 	
 	public Chomp() {
