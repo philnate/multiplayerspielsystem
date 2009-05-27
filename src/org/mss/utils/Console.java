@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 public final class Console {
 	private static BufferedReader cons = new BufferedReader(new InputStreamReader(System.in));
 	private static boolean debug = true;
-	
+	private static boolean log = true;
 	public static boolean isDebug() {
 		return debug;
 	}
@@ -71,6 +71,12 @@ public final class Console {
 	public static void debug(String text) {
 		if (debug) {
 			write("Debug: "+ text);
+		}
+	}
+	
+	public static void log(String text) {
+		if (log) {
+			write("Log: "+text);
 		}
 	}
 }
