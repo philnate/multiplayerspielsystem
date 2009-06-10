@@ -15,6 +15,9 @@ import java.net.*;
 public class MSSClient {
 
 	public static void main(String[] args) {
+		
+		ClientGUI gui = new ClientGUI();
+		gui.setVisible(true);
 
 		Socket server = null;
 		int port = 62742;
@@ -26,6 +29,7 @@ public class MSSClient {
 		port = Console.read("Bitte geb den Port für " + addr + " an, wo der MSS Server lauscht!", port);
 		boolean tryAgain = false;
 		boolean wasLoggedIn = false;
+	
 		//Falls Verbindungsabbrüche und derart stattfanden kann der Spieler es erneut versuchen
 		while (!tryAgain) {
 			try {
