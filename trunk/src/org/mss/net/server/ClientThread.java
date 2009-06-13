@@ -47,7 +47,7 @@ public class ClientThread implements Runnable {
 						int length = read.read();
 						String message = "";
 						for (int i = 0; i < length; i++) {
-							message += "\n" + read.readLine();
+							message += ((i!=0)? "\n":"") + read.readLine();
 						}
 						sci.notifyOthers(Commands.BC_MESSAGE, message/*read.readLine()*/, this);
 					} else {
@@ -110,6 +110,13 @@ public class ClientThread implements Runnable {
 	public void checkLogin() throws IOException {
 		String credentials = read.readLine();
 		int logon = Commands.LOGIN_FAILED;//Per default wird Login nicht "akzeptiert"
+		if (credentials.toLowerCase().contains("admin")) {
+			synchronized (send) {
+				send.write(Commands.LOGIN_ALREADY_ON);
+				send.flush();
+				return;
+			}		
+		}
 		if (sci.isBanned(credentials.split("\t")[0])) {//Wenn Benutzer gebannt sperren
 			synchronized (send) {
 				send.write(Commands.LOGIN_BAN);

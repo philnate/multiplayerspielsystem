@@ -142,7 +142,7 @@ public class SharedClientInfo {
 	public void notifyOthers(int type, String message, ClientThread sender) {
 		String name = (sender != null)? sender.username:"Admin";
 		if (type == Commands.BC_MESSAGE && sender != null) {
-			sender.window.addMessage(name + ":" + message, sender.window.COLOR_NORMAL);
+			sender.window.addMessage(name + ":" + message, name.hashCode());
 		}
 		synchronized (sci.getSiblings()) {
 			//Alle Teilnehmer durchschleifen und entsprechenden Befehlscode setzen und Nachricht anhängen

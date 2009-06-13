@@ -12,7 +12,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
-//TODO Namen die Admin oder Administrator enthalten verbieten
 /*
  * Abfragefenster Terminiert wenn beendet
  */

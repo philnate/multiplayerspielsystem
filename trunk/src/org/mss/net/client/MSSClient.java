@@ -17,8 +17,8 @@ public class MSSClient {
 
 	public static void main(String[] args) {
 
-		ClientGUI gui = new ClientGUI();
-		gui.setVisible(true);
+//		ClientGUI gui = new ClientGUI();
+//		gui.setVisible(true);
 
 		Socket server = null;
 		int port = 62742;
@@ -108,14 +108,12 @@ public class MSSClient {
 						String[] activeUser = read.readLine().split("\t");
 						Console.write("Aktuell angemeldete Benutzer:");
 						for (int i = 0; i < activeUser.length; i++) {
-							System.out.println(activeUser[i]);
+							Console.write(activeUser[i]);
 						}
-						Console.write("Davor");
 						//Thread zum Lesen von der Console starten
 						threadSM = new ThreadSM(send);
 						sendMessage = new Thread(threadSM);
 						sendMessage.start();
-						Console.write("Happy Chatting");
 						break;
 					case Commands.ACTION_FORBIDDEN:
 						Console.write(read.readLine());

@@ -1,5 +1,6 @@
 package org.mss.windows;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -9,8 +10,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -22,7 +21,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.mss.net.server.SharedClientInfo;
@@ -56,6 +54,7 @@ public class MainWin {
 		window.setPreferredSize(new Dimension(800,700));
 		window.setSize(window.getPreferredSize());
 		window.setLocationRelativeTo(null);
+
 		//Layout setzen
 		GridBagLayout gbl = new GridBagLayout();
 		window.setLayout(gbl);
@@ -63,6 +62,14 @@ public class MainWin {
 		messages.setEditable(false);
 		messages.setEditorKit(new HTMLEditorKit());
 		
+		//PopUp vorbereiten
+		popup.add(mIWarn);
+		popup.add(mIKick);
+		popup.add(mIBan);
+		popup.pack();
+		userlist.setComponentPopupMenu(popup);
+		userlist.setCellRenderer(new HashColorCellRenderer());
+
 		addComponent(window, gbl, new JScrollPane(messages), 0,0, 10, 10, 9,8);
 		addComponent(window, gbl, new JScrollPane(input), 0, 11, 1, 10, 9, 2);
 		addComponent(window, gbl, new JScrollPane(userlist),11,0,1,10,.1,10);
@@ -73,12 +80,10 @@ public class MainWin {
 				System.exit(0);
 			}
 		});
-		
-		
+
 		input.addKeyListener(new KeyListener() {
 			@Override
 			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
 				if (e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_ENTER) {
 					input.setText(input.getText() + "\n");
 					return;
@@ -95,47 +100,25 @@ public class MainWin {
 			public void keyTyped(KeyEvent e) {}
 			
 		});
+
 		submit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sendMessage();
 			}
 		});
-		
-		userlist.addMouseListener(new MouseAdapter() {
-			private void displayPopup(MouseEvent e) {
-	        	 popup.add(mIWarn);
-	        	 popup.add(mIKick);
-	        	 popup.add(mIBan);
-	        	 popup.pack();
-	        	 popup.setLocation(e.getLocationOnScreen());
-	        	 popup.setVisible(true);
-			}
-			
-			public void mousePressed(MouseEvent e) {
-		         if (e.isPopupTrigger()){
-		        	 displayPopup(e);
-		         }
-		    }
-			
-			public void mouseReleased(MouseEvent e) {
-		         if (e.isPopupTrigger()){
-		        	 displayPopup(e);
-		         }
-		    }
-		});
-		
+
 		mIWarn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sendAllSelected(Commands.USER_WARN);
 			}
 		});
-		
+
 		mIKick.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sendAllSelected(Commands.USER_KICK);
 			}
 		});
-		
+
 		mIBan.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sendAllSelected(Commands.USER_BAN);
@@ -180,7 +163,6 @@ public class MainWin {
 		});
 		getReason.start();
 		window.setEnabled(false);
-		popup.setVisible(false);
 	}
 
 	public void show() {
@@ -217,7 +199,9 @@ public class MainWin {
 		case COLOR_SELF: colorcode += "0000ff";
 			break;
 		case COLOR_NORMAL:
-		default:colorcode += "000000";
+		default:
+			Color col = new Color(color, false);
+			colorcode += Integer.toHexString(col.getRGB()).substring(2);
 		}
 		synchronized(messages) {
 			chatLines += "<font color='"+ colorcode + "'>" + message + "</font><br />";
