@@ -25,6 +25,7 @@ public class ThreadSM implements Runnable {
 					message = this.read.readLine();
 					synchronized (this.send) {
 						this.send.write(Commands.BC_MESSAGE);
+						this.send.write(message.split("\n").length);
 						this.send.println(message);
 						this.send.flush();
 					}

@@ -44,7 +44,12 @@ public class ClientThread implements Runnable {
 					break;
 				case Commands.BC_MESSAGE:
 					if (!username.contentEquals("")) {
-						sci.notifyOthers(Commands.BC_MESSAGE, read.readLine(), this);
+						int length = read.read();
+						String message = "";
+						for (int i = 0; i < length; i++) {
+							message += "\n" + read.readLine();
+						}
+						sci.notifyOthers(Commands.BC_MESSAGE, message/*read.readLine()*/, this);
 					} else {
 						read.readLine();//Gesendete Nachricht verwerfen
 						synchronized(send) {
