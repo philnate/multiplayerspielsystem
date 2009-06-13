@@ -1,7 +1,10 @@
 package org.mss.net.server;
 
 import org.mss.utils.*;
+import org.mss.windows.MainWin;
+import org.mss.windows.QueryWin;
 
+import java.awt.Dimension;
 import java.io.IOException;
 import java.net.ServerSocket;
 
@@ -13,19 +16,27 @@ public class MSServer {
 	private static int port = 62742;
 
 	public static void main(String[] args) {
+		//Abfragefenster für die Portauswahl erzeugen
+		QueryWin query= new QueryWin("Willkommen bei dem MSS Spielserver! - Portwahl", "Welcher Port soll, zum lauschen, benutzt werden?","Ok", Integer.toString(port),new Dimension(400,100));
+		query.show();
+
+		if (query.isCanceled()) System.exit(0);//Benutzer will Programm beenden
+		
 		try {
-			Console.write("Willkommen bei dem MSS Spielserver!");
-			listener = new ServerSocket(Console.read("Benutze Socket", port));
-			Connector connector = new Connector(listener);
-			connector.start();
+			int usePort = port;
+			if (Integer.getInteger(query.getQueryAnswer()) != null) {
+				usePort = Integer.getInteger(query.getQueryAnswer());
+			}
+			query = null;
+			MainWin mainWin = new MainWin();
+			mainWin.show();
+
+			listener = new ServerSocket(usePort);
+			Connector connector = new Connector(listener, mainWin);
+			Thread connect = new Thread(connector);
+			connect.start();
 			while (true) {//Was will Admin machen
 				switch (Console.read("?").charAt(0)) {
-				case 'u':
-					Console.write("Angemeldete Benutzer:");
-					for (int i = 0; i < ClientThread.activeUser.size(); i++) {
-						Console.write(ClientThread.activeUser.get(i));
-					}
-					break;
 				case 'x':
 					Console.write("Server wird herunter gefahren!");
 					System.exit(0);
