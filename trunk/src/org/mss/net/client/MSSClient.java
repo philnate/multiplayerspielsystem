@@ -121,7 +121,10 @@ public class MSSClient {
 						Console.write(read.readLine());
 						break;
 					case Commands.BC_MESSAGE:
-						Console.write(read.readLine());
+						int length = read.read();
+						for (int i = 0; i < length; i++) {
+							Console.write(read.readLine());
+						}
 						break;
 					case -1:
 						throw new SocketException();

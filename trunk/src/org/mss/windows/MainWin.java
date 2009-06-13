@@ -7,6 +7,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -19,6 +21,7 @@ import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.text.html.HTMLEditorKit;
 
@@ -29,7 +32,7 @@ public class MainWin {
 	SharedClientInfo sci = SharedClientInfo.getInstance();
 	JFrame window = new JFrame("MSS - Lobby");
 	JButton submit = new JButton("Senden");
-	JTextField input = new JTextField();
+	JTextArea input = new JTextArea();
 	JEditorPane messages = new JEditorPane();
 	JPopupMenu popup = new JPopupMenu("Benutzeraktion");
 	JMenuItem mIKick = new JMenuItem("User kicken");
@@ -61,7 +64,7 @@ public class MainWin {
 		messages.setEditorKit(new HTMLEditorKit());
 		
 		addComponent(window, gbl, new JScrollPane(messages), 0,0, 10, 10, 9,8);
-		addComponent(window, gbl, input, 0, 11, 1, 10, 9, 2);
+		addComponent(window, gbl, new JScrollPane(input), 0, 11, 1, 10, 9, 2);
 		addComponent(window, gbl, new JScrollPane(userlist),11,0,1,10,.1,10);
 		addComponent(window, gbl, submit, 11,11,1,1,0.5,0.5);
 
@@ -71,13 +74,28 @@ public class MainWin {
 			}
 		});
 		
-		submit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				sendMessage();
-			}
-		});
 		
-		input.addActionListener(new ActionListener() {
+		input.addKeyListener(new KeyListener() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+				if (e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_ENTER) {
+					input.setText(input.getText() + "\n");
+					return;
+				}
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					e.consume();
+					sendMessage();
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {}
+			@Override
+			public void keyTyped(KeyEvent e) {}
+			
+		});
+		submit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sendMessage();
 			}

@@ -109,7 +109,6 @@ public class SharedClientInfo {
 					}
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return false;
 			}
@@ -172,6 +171,7 @@ public class SharedClientInfo {
 							sibling.send.println(name);
 							break;
 						case Commands.BC_MESSAGE:
+							sibling.send.write(message.split("\n").length);
 							sibling.send.println(name + ":" + message);
 							break;
 						default:
