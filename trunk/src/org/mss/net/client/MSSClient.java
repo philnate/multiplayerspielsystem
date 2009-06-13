@@ -1,5 +1,6 @@
 package org.mss.net.client;
 
+import org.mss.net.client.ClientGUI;
 import org.mss.types.Commands;
 import org.mss.utils.*;
 
@@ -15,7 +16,7 @@ import java.net.*;
 public class MSSClient {
 
 	public static void main(String[] args) {
-		
+
 		ClientGUI gui = new ClientGUI();
 		gui.setVisible(true);
 
@@ -29,7 +30,6 @@ public class MSSClient {
 		port = Console.read("Bitte geb den Port für " + addr + " an, wo der MSS Server lauscht!", port);
 		boolean tryAgain = false;
 		boolean wasLoggedIn = false;
-	
 		//Falls Verbindungsabbrüche und derart stattfanden kann der Spieler es erneut versuchen
 		while (!tryAgain) {
 			try {
@@ -72,29 +72,59 @@ public class MSSClient {
 							resume = false;
 						}
 						break;
+					case Commands.LOGIN_BAN:
+						Console.write("Benutzer ist vom Server gebannt!");
+						resume = false;
+						break;
 					case Commands.BC_NEWUSER:
 						Console.write(read.readLine() + " hat sich angemeldet!");
 						break;
 					case Commands.BC_USEROFF:
 						Console.write(read.readLine() + " hat sich abgemeldet!");
 						break;
+					case Commands.USER_WARN:
+						if (read.read() == Commands.USER_SELF) {
+							Console.write("Du wurdest verwarnt! Grund:" + read.readLine());
+						} else {
+							Console.write(read.readLine());
+						}
+						break;
+					case Commands.USER_KICK:
+						if (read.read() == Commands.USER_SELF) {
+							Console.write("Du wurdest vom Server gekickt! Grund:" + read.readLine());
+						} else {
+							Console.write(read.readLine());
+						}
+						break;
+					case Commands.USER_BAN:
+						if (read.read() == Commands.USER_SELF) {
+							Console.write("Du wurdest vom Server gebannt! Grund:" + read.readLine());
+						} else {
+							Console.write(read.readLine());
+						}
+						break;
 					case Commands.USERLIST:
 						//Client wurde angemeldet alle Benutzernamen ausgeben
 						String[] activeUser = read.readLine().split("\t");
 						Console.write("Aktuell angemeldete Benutzer:");
 						for (int i = 0; i < activeUser.length; i++) {
-							Console.write(activeUser[i]);
+							System.out.println(activeUser[i]);
 						}
+						Console.write("Davor");
 						//Thread zum Lesen von der Console starten
 						threadSM = new ThreadSM(send);
 						sendMessage = new Thread(threadSM);
 						sendMessage.start();
+						Console.write("Happy Chatting");
 						break;
 					case Commands.ACTION_FORBIDDEN:
 						Console.write(read.readLine());
+						break;
 					case Commands.BC_MESSAGE:
 						Console.write(read.readLine());
 						break;
+					case -1:
+						throw new SocketException();
 					default:
 						Console.write("Unbekannten Befehl erhalten:" + command);
 					}

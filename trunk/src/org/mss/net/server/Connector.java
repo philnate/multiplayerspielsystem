@@ -4,19 +4,21 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 import org.mss.utils.Console;
+import org.mss.windows.MainWin;
 
 /*
  * Klasse Connector übernimmt die Rolle des Verbinders
  */
-public class Connector extends Thread {
+public class Connector implements Runnable {
 	private ServerSocket listener = null;
-
+	private MainWin window = null;
+	
 	public void run() {
-		Console.log("Warte auf neuen Teilnehmer!");
+		window.addMessage("Warte auf neuen Teilnehmer!", window.COLOR_NOTE);
 		try {
 			while (true) {
 				//wartet auf neuen Teilnehmer und weist ihm anschließend seinen ClientThread zu
-				ClientThread client = new ClientThread(this.listener.accept());
+				ClientThread client = new ClientThread(this.listener.accept(), window);
 				Thread clientThread = new Thread(client);
 				clientThread.start();
 			}
@@ -28,7 +30,8 @@ public class Connector extends Thread {
 		}
 	}
 
-	Connector(ServerSocket listener) {
+	Connector(ServerSocket listener, MainWin window) {
 		this.listener = listener;
+		this.window = window;
 	}
 }
