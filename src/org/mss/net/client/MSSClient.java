@@ -1,8 +1,10 @@
 package org.mss.net.client;
 
-import org.mss.net.client.ClientGUI;
 import org.mss.types.Commands;
 import org.mss.utils.*;
+import org.mss.windows.ClientConnect;
+import org.mss.windows.ClientMainWin;
+import org.mss.windows.ClientRegist;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,25 +16,41 @@ import java.net.*;
  * Spielerhauptklasse
  */
 public class MSSClient {
-
+	
 	public static void main(String[] args) {
-
-//		ClientGUI gui = new ClientGUI();
-//		gui.setVisible(true);
+		
+		ClientConnect guiConnect = new ClientConnect("Connection");
+		ClientRegist guiRegist = new ClientRegist("Registration");
+		ClientMainWin guiCMainWin = new ClientMainWin();
+		guiConnect.show();
+		guiRegist.show();
 
 		Socket server = null;
-		int port = 62742;
 		Thread sendMessage = null;
 		ThreadSM threadSM = null;
 		String addr = "localhost";
-		Console.write("Willkommen bei MSS. Dem Spielsystem der Zukunft!");
-		addr = Console.read("Bitte geb die Adresse des MSS Servers an auf den du dich anmelden willst!", addr);
-		port = Console.read("Bitte geb den Port für " + addr + " an, wo der MSS Server lauscht!", port);
+		int port = 62742;
+		//Console.write("Willkommen bei MSS. Dem Spielsystem der Zukunft!");
+		if(!guiConnect.getAddrText().contentEquals("")){
+			addr = guiConnect.getAddrText(); //Console.read("Bitte geb die Adresse des MSS Servers an auf den du dich anmelden willst!", addr);
+		}
+		System.out.println(guiConnect.getPortText());
+		if(!guiConnect.getAddrText().contentEquals("")) {
+			port = Integer.valueOf(guiConnect.getPortText()).intValue();//Console.read("Bitte geb den Port für " + addr + " an, wo der MSS Server lauscht!", port);
+		}
+		
+		String name = guiRegist.getUserText();
+		String password = guiRegist.getPwText();
+		
+		System.out.println(name + " " + password);
+			
 		boolean tryAgain = false;
 		boolean wasLoggedIn = false;
 		//Falls Verbindungsabbrüche und derart stattfanden kann der Spieler es erneut versuchen
 		while (!tryAgain) {
 			try {
+				guiCMainWin.setVisible(true);
+				
 				server = new Socket(addr, port);
 				tryAgain = true;
 				PrintWriter send = new PrintWriter(server.getOutputStream());
@@ -45,7 +63,7 @@ public class MSSClient {
 				while (resume) {
 					switch (command = read.read()) {
 					case Commands.SND_LOGIN:
-						login(send);
+						login(send, name, password);
 						break;
 					case Commands.LOGIN_SUCCESS:
 						Console.write("Erfolgreich angemeldet!");
@@ -53,21 +71,21 @@ public class MSSClient {
 						break;
 					case Commands.LOGIN_FAILED:
 						if (Console.read("Anmeldung fehlgeschlagen. Erneut versuchen", "ja").contentEquals("ja")) {
-							login(send);// Erneute Anmeldung
+							login(send, name, password);// Erneute Anmeldung
 						} else {
 							resume = false;
 						}
 						break;
 					case Commands.LOGIN_PASSWRONG:
 						if (Console.read("Passwort falsch. Erneut probieren", "ja").contentEquals("ja")) {
-							login(send);// Erneute Anmeldung
+							login(send, name, password);// Erneute Anmeldung
 						} else {
 							resume = false;
 						}
 						break;
 					case Commands.LOGIN_ALREADY_ON:
 						if (Console.read("Es ist bereits ein Benutzer mit diesem Namen angemeldet. Als anderer Benutzer anmelden", "ja").contentEquals("ja")) {
-							login(send);//Erneute Anmeldung
+							login(send, name, password);//Erneute Anmeldung
 						} else {
 							resume = false;
 						}
@@ -169,10 +187,11 @@ public class MSSClient {
 		}
 	}
 
-	public static void login(PrintWriter send) {
+	public static void login(PrintWriter send, String name, String password) {
 		send.write(Commands.SND_LOGIN);
-		send.append(Console.read("Geb deinen Benutzernamen ein", "Phil").replace("\\", "") + "\t"
-				+ Console.read("Gib dein Password ein", "0").replace("\\", "") + "\n");
+		send.append(name.replace("\\", "") + "\t" + password.replace("\\", "") + "\n");
+//		send.append(Console.read("Geb deinen Benutzernamen ein", "Phil").replace("\\", "") + "\t"
+//				+ Console.read("Gib dein Password ein", "0").replace("\\", "") + "\n");
 		send.flush();
 	}
 
