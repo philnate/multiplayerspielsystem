@@ -7,6 +7,9 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
+/*
+ * Renderer für Listenzellen. Farbe des Eintrages richtet sich nach dessen String Hashwert
+ */
 class HashColorCellRenderer extends JLabel implements ListCellRenderer {
 	private static final long serialVersionUID = 3951805205071348113L;
 
