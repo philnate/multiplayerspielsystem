@@ -3,7 +3,6 @@
 <svg
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
    version="1.0"
    width="100%"
    height="100%"
@@ -11,22 +10,18 @@
    id="svg2">
   <defs
      id="defs4" />
+  <g
+     id="layer1">
 <style id="color" type="text/css">
 .coloring {
 	stroke:#000000;
 }
 </style>
-  <path
-     d="M 242.98393,242.64069 L -33.225108,-32.174556"
-     id="path2384"
-     class="coloring"
-     style="fill:none;fill-rule:evenodd;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-  <use
-     transform="matrix(-1,0,0,1,209.75882,-12)"
-     id="use3176"
-     x="0"
-     y="0"
-     width="200"
-     height="200"
-     xlink:href="#path2384" />
+    <path
+       d="M 642.85715,592.36218 A 242.85715,242.85715 0 1 1 157.14285,592.36218 A 242.85715,242.85715 0 1 1 642.85715,592.36218 z"
+       transform="matrix(0.3951669,0,0,0.3951669,-58.009093,-133.87673)"
+       id="path2383"
+       class="coloring"
+       style="opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke-width:20;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:4.3;stroke-opacity:1" />
+  </g>
 </svg>
