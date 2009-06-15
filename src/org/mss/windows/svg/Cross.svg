@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.0"
+   width="100%"
+   height="100%"
+   viewBox="0 0 200 200"
+   id="svg2">
+  <defs
+     id="defs4" />
+<style id="color" type="text/css">
+.coloring {
+	stroke:#000000;
+}
+</style>
+  <path
+     d="M 242.98393,242.64069 L -33.225108,-32.174556"
+     id="path2384"
+     class="coloring"
+     style="fill:none;fill-rule:evenodd;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <use
+     transform="matrix(-1,0,0,1,209.75882,-12)"
+     id="use3176"
+     x="0"
+     y="0"
+     width="200"
+     height="200"
+     xlink:href="#path2384" />
+</svg>
