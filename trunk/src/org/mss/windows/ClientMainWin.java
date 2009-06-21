@@ -17,6 +17,10 @@ import javax.swing.JTextArea;
 public class ClientMainWin  extends JFrame implements KeyListener, ActionListener {
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5466899701556007438L;
 	JTextArea txtIn = new JTextArea(5,30);
 	JTextArea txtOut = new JTextArea(20,25);
 	JTextArea txtUserList = new JTextArea(30,15);
