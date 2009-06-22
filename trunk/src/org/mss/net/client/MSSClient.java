@@ -18,31 +18,26 @@ import java.net.*;
 public class MSSClient {
 	
 	public static void main(String[] args) {
-		
-		ClientConnect guiConnect = new ClientConnect("Connection");
-		ClientRegist guiRegist = new ClientRegist("Registration");
-		ClientMainWin guiCMainWin = new ClientMainWin();
-		guiConnect.show();
-		guiRegist.show();
 
 		Socket server = null;
 		Thread sendMessage = null;
 		ThreadSM threadSM = null;
 		String addr = "localhost";
-		int port = 62742;
+		int port = 62742;	
+		
+		ClientConnect guiConnect = new ClientConnect("Connection", addr, Integer.toString(port));
+		ClientRegist guiRegist = new ClientRegist("Registration");
+		ClientMainWin guiCMainWin = new ClientMainWin();
+
+		guiConnect.show();
+		guiRegist.show();
+		
 		//Console.write("Willkommen bei MSS. Dem Spielsystem der Zukunft!");
-		if(!guiConnect.getAddrText().contentEquals("")){
-			addr = guiConnect.getAddrText(); //Console.read("Bitte geb die Adresse des MSS Servers an auf den du dich anmelden willst!", addr);
-		}
-		System.out.println(guiConnect.getPortText());
-		if(!guiConnect.getAddrText().contentEquals("")) {
-			port = Integer.valueOf(guiConnect.getPortText()).intValue();//Console.read("Bitte geb den Port für " + addr + " an, wo der MSS Server lauscht!", port);
-		}
+		addr = guiConnect.getAddrText(); //Console.read("Bitte geb die Adresse des MSS Servers an auf den du dich anmelden willst!", addr);		
+		port = Integer.valueOf(guiConnect.getPortText()).intValue();//Console.read("Bitte geb den Port für " + addr + " an, wo der MSS Server lauscht!", port);
 		
 		String name = guiRegist.getUserText();
 		String password = guiRegist.getPwText();
-		
-		System.out.println(name + " " + password);
 			
 		boolean tryAgain = false;
 		boolean wasLoggedIn = false;
@@ -126,7 +121,8 @@ public class MSSClient {
 						String[] activeUser = read.readLine().split("\t");
 						Console.write("Aktuell angemeldete Benutzer:");
 						for (int i = 0; i < activeUser.length; i++) {
-							Console.write(activeUser[i]);
+							//Console.write(activeUser[i]);
+							guiCMainWin.setUserList(activeUser[i]);
 						}
 						//Thread zum Lesen von der Console starten
 						threadSM = new ThreadSM(send);
