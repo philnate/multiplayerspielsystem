@@ -29,7 +29,7 @@ public class ClientConnect implements ActionListener {
 	String queryAnswer = "";
 	boolean canceled = false;
 	
-	public ClientConnect(String windowTitle) {
+	public ClientConnect(String windowTitle, String addr,  String port) {
 		
 
 		window.setResizable(false);
@@ -49,6 +49,8 @@ public class ClientConnect implements ActionListener {
 		setComp(window, gbl, new JScrollPane(txtAddr), 1,0,1,1,1,2);
 		setComp(window, gbl, new JScrollPane(txtPort), 1,1,1,1,1,1);
 		setComp(window, gbl, new JScrollPane(bnext), 2,1,1,1,1,1);
+		txtAddr.setText(addr);
+		txtPort.setText(port);
 		bnext.addActionListener(this);		
 	}
 	
@@ -73,7 +75,7 @@ public class ClientConnect implements ActionListener {
 	
 	public String getPortText(){
 		return txtPort.getText();
-	}
+	}	
 	
 	public void show() {			
 		

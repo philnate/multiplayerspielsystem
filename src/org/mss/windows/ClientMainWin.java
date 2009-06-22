@@ -104,6 +104,10 @@ public class ClientMainWin  extends JFrame implements KeyListener, ActionListene
 		c.add(comp,gbc);
 	}
 	
+	public void setUserList(String user){
+		txtUserList.setText(user);
+	}
+	
 	public void actionPerformed(ActionEvent e){
 		if (e.getSource() == bClose) {
 			dispose();
