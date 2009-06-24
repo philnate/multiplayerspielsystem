@@ -8,8 +8,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -81,7 +81,7 @@ public class MainWin {
 			}
 		});
 
-		input.addKeyListener(new KeyListener() {
+		input.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -93,12 +93,6 @@ public class MainWin {
 					sendMessage();
 				}
 			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {}
-			@Override
-			public void keyTyped(KeyEvent e) {}
-			
 		});
 
 		submit.addActionListener(new ActionListener() {
@@ -151,7 +145,6 @@ public class MainWin {
 									sci.addUser(sci.getSiblings().get(users[i]).username,true);
 								}
 								sci.getSiblings().remove(users[i]).close();
-								
 							}
 						}
 						refreshUserlist();
@@ -183,6 +176,7 @@ public class MainWin {
 		gbl.setConstraints( c, gbc ); 
 		cont.add( c ); 
 	}
+
 	public void refreshUserlist() {
 		synchronized(sci.getSiblings()) {
 			userlist.setListData(sci.getSiblingsArray());
@@ -204,7 +198,7 @@ public class MainWin {
 			colorcode += Integer.toHexString(col.getRGB()).substring(2);
 		}
 		synchronized(messages) {
-			chatLines += "<font color='"+ colorcode + "'>" + message + "</font><br />";
+			chatLines += "<font color='"+ colorcode + "'>" + message.replace("\n", "<br />") + "</font><br />";
 			messages.setText(htmlStart + chatLines + htmlEnd);
 		}
 	}

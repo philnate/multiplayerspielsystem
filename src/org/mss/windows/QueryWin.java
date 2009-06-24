@@ -95,7 +95,7 @@ public class QueryWin {
 	}
 
 	public String getQueryAnswer() {
-		return queryAnswer;
+		return input.getText();
 	}
 	
 	public boolean isCanceled() {
@@ -138,7 +138,6 @@ public class QueryWin {
 
 	private void closeWindow(boolean canceled) {
 		synchronized(nop) {
-			queryAnswer = canceled? "":input.getText();//Festlegen welcher Text übergeben wird
 			this.canceled = canceled;
 			nop.notifyAll();
 		}
