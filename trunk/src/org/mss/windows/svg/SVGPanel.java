@@ -1,14 +1,10 @@
 package org.mss.windows.svg;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.IOException;
 
-import javax.swing.JPanel;
-
 import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
 import org.apache.batik.swing.JSVGCanvas;
-import org.apache.batik.script.Window;
 import org.apache.batik.util.XMLResourceDescriptor;
 
 import org.w3c.dom.Document;
@@ -18,16 +14,16 @@ import org.w3c.dom.Node;
 /*
  * 
  */
-public class SVGPanel extends JPanel {
+public class SVGPanel extends JSVGCanvas{
 	
 	private static final long serialVersionUID = 1405056131073275382L;
 	public static String CIRCLE = "/Circle.svg";
 	public static String CROSS = "/Cross.svg";
-
-	JSVGCanvas svgPic = new JSVGCanvas();
+	public static String FULL ="/Full.svg";
+	
+	public String specialInfo = "";
 	Color color = null;
 	Document document;
-	Window window;
 	Element svg;
 
 	public SVGPanel(String picture) {
@@ -52,8 +48,6 @@ public class SVGPanel extends JPanel {
 			e.printStackTrace();
 		}
 		//Dokument zuweisen und für Resize usw Layoutsetzen
-		svgPic.setDocument(document);
-		this.setLayout(new BorderLayout(1,1));
-		this.add(svgPic,BorderLayout.CENTER);
+		this.setDocument(document);
 	}
 }
