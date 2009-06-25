@@ -16,7 +16,8 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 	public abstract Spieler[] runde();
 	public abstract Spieler folgeSpieler();
 	protected ArrayList<Zug> zuege = null;
-	
+	protected Spielfenster fenster;
+
 	public Spieler[] durchgang() {
 		boolean error =false;
 		do {

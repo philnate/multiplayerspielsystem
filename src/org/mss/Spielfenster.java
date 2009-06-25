@@ -28,13 +28,11 @@ public class Spielfenster extends JFrame implements MouseListener {
 	JLabel[] names = new JLabel[2];
 	SVGPanel[][] positions;
 	ArrayList<FieldClickedListener> listener = new ArrayList<FieldClickedListener>(1);
+	GridBagLayout gbl = new GridBagLayout();
 	
-	public Spielfenster(int x, int y, String initialDisplay, Spieler[] spieler, String[] playerSigns) {
-		if (spieler.length != 2) {
-			throw new IllegalArgumentException("Spieleranzahl stimmt nicht. Muss 2 betragen");
-		}
+	public Spielfenster(int x, int y, String initialDisplay) {
 		positions = new SVGPanel[y][x];
-		GridBagLayout gbl = new GridBagLayout();
+		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLayout(gbl);
 		this.setSize(new Dimension(400,400));
@@ -42,9 +40,8 @@ public class Spielfenster extends JFrame implements MouseListener {
 		GridBagLayout gblField = new GridBagLayout();
 		field.setBorder(BorderFactory.createLineBorder(Color.black));
 		field.setLayout(gblField);
-		int i,j=0;
-		for (i = 0; i < y; i++) {
-			for (j = 0; j < x; j++) {
+		for (int i = 0; i < y; i++) {
+			for (int j = 0; j < x; j++) {
 				positions[i][j] = new SVGPanel(SVGPanel.FULL,Color.blue);
 				positions[i][j].addMouseListener(this);
 				positions[i][j].setBorder(BorderFactory.createLineBorder(Color.white));
@@ -54,23 +51,26 @@ public class Spielfenster extends JFrame implements MouseListener {
 		}
 
 		addComponent(this, gbl, field, 0, 0, 10, 10, 1, 1);
-		for (int k = 0; k < playerSigns.length; k++) {
-			names[k] = new JLabel(spieler[k].toString());
-			names[k].setVerticalAlignment(JLabel.CENTER);
-
-			signs[k] = new SVGPanel(playerSigns[k], new Color(spieler[k].toString().hashCode()));
-			signs[k].setSize(new Dimension(20,20));
-			players[k] = new JPanel();
-			players[k].setLayout(new GridLayout(1,2));
-			players[k].setSize(new Dimension(20,100));
-			players[k].add(signs[k]);
-			players[k].add(names[k]);
-			addComponent(this, gbl, players[k], 11, k, 1, 1, 0.1, 0.1);
-		}
 	}
 	
-	public void setPicture(int x, int y, int Picture) {
-		
+	public void setPlayer(Spieler[] spieler, String[] playerSigns) {
+		for (int i = 0; i < playerSigns.length; i++) {
+			names[i] = new JLabel(spieler[i].toString());
+			names[i].setVerticalAlignment(JLabel.CENTER);
+
+			signs[i] = new SVGPanel(playerSigns[i], new Color(spieler[i].toString().hashCode()));
+			signs[i].setSize(new Dimension(20,20));
+			players[i] = new JPanel();
+			players[i].setLayout(new GridLayout(1,2));
+			players[i].setSize(new Dimension(20,100));
+			players[i].add(signs[i]);
+			players[i].add(names[i]);
+			addComponent(this, gbl, players[i], 11, i, 1, 1, 0.1, 0.1);
+		}		
+	}
+
+	public void setPicture(int x, int y, String picture) {
+		positions[y][x] = new SVGPanel(picture);
 	}
 
 	public static void main(String[] args) {
@@ -80,7 +80,8 @@ public class Spielfenster extends JFrame implements MouseListener {
 		signs[1] = SVGPanel.CROSS;
 		spieler[0] = new Spieler("Phil");
 		spieler[1] = new Spieler("MeMe");
-		Spielfenster fenster = new Spielfenster( 4, 4, SVGPanel.FULL, spieler, signs);
+		Spielfenster fenster = new Spielfenster( 4, 4, SVGPanel.FULL);
+		fenster.setPlayer(spieler, signs);
 		fenster.setVisible(true);
 	}
 
@@ -101,9 +102,11 @@ public class Spielfenster extends JFrame implements MouseListener {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		System.out.println(((SVGPanel)e.getSource()).specialInfo);
+		String info = ((SVGPanel)e.getSource()).specialInfo;
 		FieldClickedListener[] listener=this.getFieldClickedListener();
 		for (int i =0; i < listener.length; i++) {
+			listener[i].zugIsDone(Integer.parseInt(info.substring(0,info.indexOf(":"))),
+					Integer.parseInt(info.substring(info.indexOf(":")+1)));
 		}
 	}
 
