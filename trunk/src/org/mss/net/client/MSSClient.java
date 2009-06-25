@@ -55,8 +55,10 @@ public class MSSClient {
 					case Commands.SND_LOGIN:
 						guiCMainWin.setUsername(login(send));
 						break;
+					case 63://Jaja der falsche Login Code
 					case Commands.LOGIN_SUCCESS:
 						wasLoggedIn = true;
+						System.out.println("Erfolgreich angemeldet");
 						guiCMainWin.setVisible(true);
 						break;
 					case Commands.LOGIN_FAILED:
@@ -94,13 +96,11 @@ public class MSSClient {
 					case Commands.BC_NEWUSER:
 						String user = read.readLine();
 						guiCMainWin.addUser(user);
-//						guiCMainWin.setUserList(guiCMainWin.getUserList()+user+"\n");
 						guiCMainWin.addMessage(user + " hat sich angemeldet!");
 						break;
 					case Commands.BC_USEROFF:
 						String usr = read.readLine();
 						guiCMainWin.removeUser(usr);
-//						guiCMainWin.setUserList(guiCMainWin.getUserList().replace(usr+"\n", ""));
 						guiCMainWin.addMessage(usr + " hat sich abgemeldet!");
 						break;
 					case Commands.USER_WARN:
@@ -129,7 +129,6 @@ public class MSSClient {
 						for (int i = 0; i < users.length; i++) {
 							guiCMainWin.addUser(users[i]);
 						}
-//						guiCMainWin.setUserList(read.readLine().replace("\t","\n"));
 						break;
 					case Commands.ACTION_FORBIDDEN:
 						guiCMainWin.addMessage(read.readLine());
@@ -143,6 +142,7 @@ public class MSSClient {
 					case -1:
 						throw new SocketException();
 					default:
+						System.out.println("Falscher Code Erhalten" + command);
 						guiCMainWin.addMessage("Unbekannten Befehl erhalten:" + command);
 					}
 				}
@@ -171,7 +171,7 @@ public class MSSClient {
 			if (!tryAgain && !wasLoggedIn) {
 				qyn = new QueryWinYesNo("Erneut probieren", "Erneut probieren?", new Dimension(300,100));
 				qyn.show();
-				tryAgain = qyn.getAnswer();
+				tryAgain = !qyn.getAnswer();
 			} else if (!tryAgain && wasLoggedIn) {
 				wasLoggedIn = false;
 			}
