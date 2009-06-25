@@ -47,7 +47,7 @@ public class SVGPanel extends JSVGCanvas{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//Dokument zuweisen und für Resize usw Layoutsetzen
+		//Dokument zuweisen
 		this.setDocument(document);
 	}
 }
