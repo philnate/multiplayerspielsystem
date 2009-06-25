@@ -1,5 +1,6 @@
 package org.mss.net.client;
 
+import org.mozilla.javascript.tools.debugger.GuiCallback;
 import org.mss.types.Commands;
 import org.mss.utils.*;
 import org.mss.windows.ClientMainWin;
@@ -37,6 +38,7 @@ public class MSSClient {
 
 		boolean tryAgain = false;
 		boolean wasLoggedIn = false;
+		ClientMainWin guiCMainWin = null;
 		//Falls Verbindungsabbrüche und derart stattfanden kann der Spieler es erneut versuchen
 		while (!tryAgain) {
 			try {
@@ -44,9 +46,9 @@ public class MSSClient {
 				tryAgain = true;
 				PrintWriter send = new PrintWriter(server.getOutputStream());
 				BufferedReader read = new BufferedReader(new InputStreamReader(server.getInputStream()));
-				Console.write("Verbindung hergestellt");
-				ClientMainWin guiCMainWin = new ClientMainWin(send);
-				
+				if (guiCMainWin == null) {
+					guiCMainWin = new ClientMainWin(send);
+				}
 				int command = 0;
 				boolean resume = true;
 				//Auf Befehle warten solange nichts gegenteiliges Empfangen wurde oder eintritt
@@ -176,6 +178,10 @@ public class MSSClient {
 				wasLoggedIn = false;
 			}
 		}
+		if (guiCMainWin != null) {
+			guiCMainWin.dispose();
+		}
+		guiCMainWin = null;
 	}
 
 	public static String login(PrintWriter send) {
