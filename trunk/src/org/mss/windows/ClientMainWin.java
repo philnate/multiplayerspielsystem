@@ -25,6 +25,8 @@ import javax.swing.JTextArea;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.mss.types.Commands;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class ClientMainWin extends JFrame implements KeyListener, ActionListener {
 
@@ -60,6 +62,12 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 				}
 			}
 			users.add(user);
+			//Bisschen nett sortieren :D
+			Collections.sort(users, new Comparator<String>(){
+				public int compare(String s1, String s2) {
+					return s1.compareTo(s2);
+				}
+			});
 			userlist.setListData(users);
 		}
 	}

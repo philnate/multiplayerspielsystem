@@ -6,8 +6,10 @@ import java.util.Random;
 
 import org.mss.types.Zug;
 import org.mss.utils.Console;
+import org.mss.windows.svg.SVGPanel;
 import org.mss.Spiel;
 import org.mss.Spieler;
+import org.mss.Spielfenster;
 
 public class Chomp extends Spiel {
 	private boolean spieler1 = true;
@@ -28,6 +30,7 @@ public class Chomp extends Spiel {
 			}
 		}
 		zuege = new ArrayList<Zug>(breite*hoehe/4);
+		fenster = new Spielfenster(breite,hoehe, SVGPanel.FULL);
 	}
 	
 	public Chomp() {
@@ -144,26 +147,17 @@ public class Chomp extends Spiel {
 		// zufälliges Feld berechnen und prüfen, ob es schon gesetzt ist
 		// feld[0][0] und feld[1][1] dürfen dabei nicht gesetzt werden
 		if(!needKi){
-//			if (feld[2][1].contentEquals(" ") && feld[1][2].contentEquals(" ") /*&& feld[1][1].contentEquals(" ")*/) {
-				while(isFree == false){
-					col = random.nextInt(breite-2)+1;
-					row = random.nextInt(hoehe-2)+1;
-					Console.debug("zufall: " + col + " " + row);				
-					if(feld[hoehe-1 - row][col].contentEquals(" ")){
-						isFree = true;
-					}
-					if((col == 0 && row == hoehe-1) || (col == 1 && row == hoehe -2 )){
-						isFree = false;
-					}
+			while(isFree == false){
+				col = random.nextInt(breite-2)+1;
+				row = random.nextInt(hoehe-2)+1;
+				Console.debug("zufall: " + col + " " + row);				
+				if(feld[hoehe-1 - row][col].contentEquals(" ")){
+					isFree = true;
 				}
-//			} else {
-//				Console.debug("What am I doing?");
-//				if (!feld[2][1].contentEquals(" ")) {
-//					return new Turn(spieler,0,0,2,height-2);
-//				} else {
-//					return new Turn(spieler, 0,0, 0,height-3);
-//				}
-//			}
+				if((col == 0 && row == hoehe-1) || (col == 1 && row == hoehe -2 )){
+					isFree = false;
+				}
+			}
 			return new Zug(spieler, 0,0, col, row);
 		} 
 		// ab hier greift KI
@@ -272,6 +266,7 @@ public class Chomp extends Spiel {
 		if (this.spieler.size() == 2) {
 			throw new Exception("Maximale Zahl von Spielern erreicht!");
 		}
+		//TODO automatische Benutzer hinzufügung immer wenn einer hinzugefügt wird!
 		return this.spieler.add(spieler);
 	}
 }
