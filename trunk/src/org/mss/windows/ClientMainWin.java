@@ -33,7 +33,6 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 	 */
 	private static final long serialVersionUID = 5466899701556007438L;
 	JTextArea txtSend = new JTextArea(5, 30);
-//	JTextArea txtIn = new JTextArea(20, 25);
 	JList userlist = new JList();
 	JButton bSend = new JButton("Senden");
 	JButton bClose = new JButton("Schlieﬂen");
@@ -100,7 +99,6 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 		messages.setEditable(false);
 		messages.setEditorKit(new HTMLEditorKit());
 		setComp(c, gbl, new JScrollPane(messages), 1, 0, 3, 1);
-//		txtIn.setFocusable(false);
 
 		// Eingabe-Feld
 		setComp(c, gbl, new JScrollPane(txtSend), 1, 3, 1, 1);
@@ -194,8 +192,6 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 }
