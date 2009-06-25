@@ -1,17 +1,9 @@
 package org.mss.utils.listener;
 
-import java.util.EventObject;
+import java.util.EventListener;
 import org.mss.types.Zug;
 
-public class FieldClickedListener extends EventObject {
-	private Zug zug = null;
+public class FieldClickedListener implements EventListener {
 	
-	public FieldClickedListener(Zug zug) {
-		super(null);
-		this.zug = zug;
-	}
-	
-	public Zug getZug() {
-		return zug;
-	}
+	public void zugIsDone(Zug zug){};
 }
