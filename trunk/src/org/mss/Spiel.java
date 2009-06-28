@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public abstract class Spiel extends Spielfeld implements Protokollierbar {
-	protected ArrayList<Spieler> spieler = null;
+	protected ArrayList<Spieler> spieler = new ArrayList<Spieler>(2);
 	protected boolean track = false;
 	protected Spieler[] gewinner = null;
 	public abstract Zug frageSpieler(Spieler spieler);

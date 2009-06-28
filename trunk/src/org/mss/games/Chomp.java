@@ -1,5 +1,6 @@
 package org.mss.games;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
@@ -13,7 +14,8 @@ import org.mss.Spielfenster;
 
 public class Chomp extends Spiel {
 	private boolean spieler1 = true;
-	
+	private final static String[] playerSigns = new String[2];
+
 	public Chomp(int breite, int hoehe) {
 		this.breite = (breite > 0)? breite:-breite;
 		this.hoehe = (hoehe > 0)? hoehe:-hoehe;
@@ -31,6 +33,11 @@ public class Chomp extends Spiel {
 		}
 		zuege = new ArrayList<Zug>(breite*hoehe/4);
 		fenster = new Spielfenster(breite,hoehe, SVGPanel.FULL);
+		fenster.setVisible(true);
+		fenster.toFront();
+		playerSigns[0] = SVGPanel.FULL;
+		playerSigns[1] = SVGPanel.FULL;
+		
 	}
 	
 	public Chomp() {
@@ -49,7 +56,7 @@ public class Chomp extends Spiel {
 		}
 		setzeZug(zug);
 		spieler1 = !spieler1;
-		zeigeFeld();
+//		zeigeFeld();
 		checkWin();
 		return gewinner;
 	}
@@ -74,19 +81,28 @@ public class Chomp extends Spiel {
 	@Override
 	public Zug frageSpieler(Spieler spieler) {
 		if (spieler.isComp()) {
-			System.out.println("Computer "+ spieler.getName() + " ist an der Reihe.");
+//			System.out.println("Computer "+ spieler.getName() + " ist an der Reihe.");
 			return kI(spieler);
 		}
-		System.out.println(spieler.toString() + " du bist dran:");
-		System.out.println("Wähle eine Spalte:");
-		int col = Console.read(-1);
-		System.out.println("Wähle eine Zeile:");
-		int row = Console.read(-1);
-		return new Zug(spieler, 0,0, col, row);
+		fenster.setLocked(false);
+//		System.out.println(spieler.toString() + " du bist dran:");
+//		System.out.println("Wähle eine Spalte:");
+//		int col = Console.read(-1);
+//		System.out.println("Wähle eine Zeile:");
+//		int row = Console.read(-1);
+		try {
+			synchronized (fenster) {
+				fenster.wait();
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(fenster.getPosX()+ " "+fenster.getPosY());
+		return new Zug(spieler, 0,0, fenster.getPosX(),fenster.getPosY());//col, row);
 	}
 
 	private void setzeZug(Zug zug) throws Exception {
-		System.out.println(zug.toString());
 		if ((zug.getAufX() < breite && zug.getAufX() >= 0) 
 				&& ((hoehe-1 - zug.getAufY()) < hoehe && (hoehe-1 - zug.getAufY()) >= 0) 
 				&& feld[hoehe-1 - zug.getAufY()][zug.getAufX()].contentEquals(" ")) {
@@ -94,6 +110,8 @@ public class Chomp extends Spiel {
 				for (int j = hoehe-1 - zug.getAufY(); j < hoehe; j++) {
 					if (feld[j][i].contentEquals(" ")) {
 						feld[j][i] = (spieler1)? "X":"O";
+						
+						fenster.setPicture(i, j, (spieler1)? playerSigns[0]:playerSigns[1], new Color(zug.getSpieler().toString().hashCode()));
 					}
 				}
 			}
@@ -266,7 +284,12 @@ public class Chomp extends Spiel {
 		if (this.spieler.size() == 2) {
 			throw new Exception("Maximale Zahl von Spielern erreicht!");
 		}
-		//TODO automatische Benutzer hinzufügung immer wenn einer hinzugefügt wird!
-		return this.spieler.add(spieler);
+		try {		
+			return this.spieler.add(spieler);
+		} finally {
+			if (this.spieler.size() == 2) {
+				fenster.setPlayer(this.spieler.toArray(new Spieler[0]), playerSigns);
+			}
+		}
 	}
 }
