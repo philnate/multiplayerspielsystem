@@ -1,16 +1,20 @@
 package org.mss.games;
 
 import org.mss.Spiel;
+import org.mss.Spielfenster;
 import org.mss.types.Zug;
 import org.mss.Spieler;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 import org.mss.utils.Console;
+import org.mss.windows.svg.SVGPanel;
 
 public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 	private boolean spieler1 = true;
 	private int[] freieFelder;
+	private final static String[] playerSigns = new String[2];
 
 	public Viergewinnt(int breite, int hoehe) {
 		this.breite = (breite > 0)? breite:-breite;
@@ -32,6 +36,13 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 		for (int i = 0; i < this.breite; i++) {
 			freieFelder[i] = this.hoehe;
 		}
+
+		playerSigns[0] = SVGPanel.CIRCLE;
+		playerSigns[1] = SVGPanel.CROSS;
+
+		fenster = new Spielfenster(breite,hoehe,SVGPanel.FULL);
+		fenster.setVisible(true);
+		fenster.toFront();
 	}
 
 	public Viergewinnt() {
@@ -59,6 +70,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 		}
 		try {
 			if (freieFelder[turn.getAufX()] > 0) {
+				fenster.setPicture(turn.getAufX(), freieFelder[turn.getAufX()]-1, (spieler1)? playerSigns[0]:playerSigns[1], new Color(turn.getSpieler().toString().hashCode()));
 				feld[--freieFelder[turn.getAufX()]][turn.getAufX()] = spieler1? "X":"O";
 				spieler1 = !spieler1;
 				if (track) {
@@ -74,6 +86,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 				}
 			}
 		} catch (ArrayIndexOutOfBoundsException e) {
+			e.printStackTrace();
 			throw new Exception("Zug liegt nicht im Spielfeld!");
 		}
 		return gewinner;
@@ -110,12 +123,21 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 
 	public Zug frageSpieler(Spieler spieler) {
 		if (spieler.isComp()) {
-			System.out.println("Computer " + spieler.getName() + " ist an der Reihe.");
+//			System.out.println("Computer " + spieler.getName() + " ist an der Reihe.");
 			return kI(spieler);
 		}
-		System.out.println(spieler.toString() + " du bist dran:");
-		System.out.println("Wähle eine Spalte:");
-		return new Zug(spieler, 0,0, Console.read(-1), 0);
+//		System.out.println(spieler.toString() + " du bist dran:");
+//		System.out.println("Wähle eine Spalte:");
+		fenster.setLocked(false);
+		try {
+			synchronized (fenster) {
+				fenster.wait();
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new Zug(spieler, 0,0, fenster.getPosX(),0);//Console.read(-1), 0);
 	}
 	
 	public boolean plusSpieler(Spieler spieler) throws Exception {

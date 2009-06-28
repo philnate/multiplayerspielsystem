@@ -27,10 +27,14 @@ public class SVGPanel extends JSVGCanvas{
 	Element svg;
 
 	public SVGPanel(String picture) {
-		this(picture, new Color(0));
+		setDocument(picture, new Color(0));
 	}
 	
 	public SVGPanel(String picture, Color color) {
+		setDocument(picture, color);
+	}
+	
+	private void setDocument(String picture, Color color) {
 		//Nötigen Klassen zum Laden der SVG erzeugen
 		String parser = XMLResourceDescriptor.getXMLParserClassName();
 		SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parser);
@@ -49,5 +53,9 @@ public class SVGPanel extends JSVGCanvas{
 		}
 		//Dokument zuweisen
 		this.setDocument(document);
+	}
+
+	public void setPicture(String picture, Color color) {
+		setDocument(picture, color);
 	}
 }

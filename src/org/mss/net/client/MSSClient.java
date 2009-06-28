@@ -1,8 +1,6 @@
 package org.mss.net.client;
 
-import org.mozilla.javascript.tools.debugger.GuiCallback;
 import org.mss.types.Commands;
-import org.mss.utils.*;
 import org.mss.windows.ClientMainWin;
 import org.mss.windows.NoticeWin;
 import org.mss.windows.QueryWinDouble;
