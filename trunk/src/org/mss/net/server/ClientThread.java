@@ -3,11 +3,10 @@ package org.mss.net.server;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
-import org.mss.types.Commands;
+import org.mss.types.MSSDataObject;
 import org.mss.utils.Console;
 import org.mss.windows.MainWin;
 
@@ -16,8 +15,8 @@ import org.mss.windows.MainWin;
  */
 public class ClientThread implements Runnable {
 	private Socket client = null;
-	protected PrintWriter send = null;
-	private BufferedReader read = null;
+	protected ObjectOutputStream snd = null;
+	private ObjectInputStream red = null;
 	public String username = "";
 	private static SharedClientInfo sci = SharedClientInfo.getInstance();
 	protected MainWin window = null;
@@ -27,35 +26,37 @@ public class ClientThread implements Runnable {
 		//Wenn zum ersten mal gestartet laden der Benutzerdatei
 		try {
 			//Zur Liste der angemeldeten Clients hinzufügen
-			send = new PrintWriter(client.getOutputStream());
-			read = new BufferedReader(new InputStreamReader(client.getInputStream()));
+			snd = new ObjectOutputStream(client.getOutputStream());
+			snd.flush();
+			red = new ObjectInputStream(client.getInputStream());
 
-			synchronized (send) {
-				send.write(Commands.SND_LOGIN);// Login Daten anfordern.
-				send.flush();
+			synchronized (snd) {
+				snd.writeObject(new MSSDataObject(MSSDataObject.SND_LOGIN));
+				snd.flush();
 			}
 			boolean resume = true;
 			int command = 0;
 			//Gucken was der Benutzer sendet und dem entsprechend verfahren
 			while (resume) {
-				switch (command = read.read()) {
-				case Commands.SND_LOGIN:
-					checkLogin();
+				MSSDataObject inData = null;
+				try {
+					inData = (MSSDataObject) red.readObject();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+//				switch (command = read.read()) {
+				switch (inData.getType()) {
+				case MSSDataObject.SND_LOGIN:
+					checkLogin(inData);
 					break;
-				case Commands.BC_MESSAGE:
+				case MSSDataObject.BC_MESSAGE:
 					if (!username.contentEquals("")) {
-						int length = read.read();
-						String message = "";
-						for (int i = 0; i < length; i++) {
-							message += ((i!=0)? "\n":"") + read.readLine();
-						}
-						sci.notifyOthers(Commands.BC_MESSAGE, message/*read.readLine()*/, this);
+						sci.notifyOthers(MSSDataObject.BC_MESSAGE, (String) inData.getData()/*message*/, this);
 					} else {
-						read.readLine();//Gesendete Nachricht verwerfen
-						synchronized(send) {
-							send.write(Commands.ACTION_FORBIDDEN);
-							send.println("Nur angemeldete Benutzer dürfen Nachrichten schicken!");
-							send.flush();
+						synchronized(snd) {
+							snd.writeObject(new MSSDataObject(MSSDataObject.ACTION_FORBIDDEN,"Nur angemeldete Benutzer dürfen Nachrichten schicken!"));
+							snd.flush();
 						}
 					}
 					break;
@@ -75,7 +76,7 @@ public class ClientThread implements Runnable {
 			//Egal welcher Fehler aufgetreten ist, der Benutzer wird vom Server abgemeldet
 			//An die anderen Benutzer schicken das einer offline gegangen ist, außer bei Kick
 			if (!kicked) {
-				sci.notifyOthers(Commands.BC_USEROFF, this);	
+				sci.notifyOthers(MSSDataObject.BC_USEROFF, this);	
 			}
 
 			try {
@@ -107,36 +108,36 @@ public class ClientThread implements Runnable {
 	/*
 	 * Überprüfen der gelieferten Login Informationen
 	 */
-	public void checkLogin() throws IOException {
-		String credentials = read.readLine();
-		int logon = Commands.LOGIN_FAILED;//Per default wird Login nicht "akzeptiert"
+	public void checkLogin(MSSDataObject data) throws IOException {
+		String credentials = (String) data.getData();//read.readLine();
+		int logon = MSSDataObject.LOGIN_FAILED;//Per default wird Login nicht "akzeptiert"
 		if (credentials.toLowerCase().contains("admin")) {
-			synchronized (send) {
-				send.write(Commands.LOGIN_ALREADY_ON);
-				send.flush();
+			synchronized (snd) {
+				snd.writeObject(MSSDataObject.LOGIN_ALREADY_ON);
+				snd.flush();
 				return;
 			}		
 		}
 		if (sci.isBanned(credentials.split("\t")[0])) {//Wenn Benutzer gebannt sperren
-			synchronized (send) {
-				send.write(Commands.LOGIN_BAN);
-				send.flush();
+			synchronized (snd) {
+				snd.writeObject(MSSDataObject.LOGIN_BAN);
+				snd.flush();
 				username = credentials.split("\t")[0] + "(gebannt)";
 				throw new SocketException();
 			}
 		}
 		if (sci.findSibling(credentials.split("\t")[0])) {
-			logon = Commands.LOGIN_ALREADY_ON;
+			logon = MSSDataObject.LOGIN_ALREADY_ON;
 		}
-		if (logon != Commands.LOGIN_ALREADY_ON) {
+		if (logon != MSSDataObject.LOGIN_ALREADY_ON) {
 			logon = sci.findUser(credentials);
 			//Existiert Benutzer in Datei?
-			if (logon == Commands.LOGIN_FAILED) {
+			if (logon == MSSDataObject.LOGIN_FAILED) {
 				//Nein hinzufügen
-				logon = sci.addUser(credentials, false) ? Commands.LOGIN_SUCCESS : Commands.LOGIN_FAILED;
+				logon = sci.addUser(credentials, false) ? MSSDataObject.LOGIN_SUCCESS : MSSDataObject.LOGIN_FAILED;
 			}
 			//Anmeldung hat funktioniert. Also hinzufügen und Namen setzen
-			if (logon == Commands.LOGIN_SUCCESS) {
+			if (logon == MSSDataObject.LOGIN_SUCCESS) {
 				username = credentials.split("\t")[0];
 				sci.addSibling(this);
 				window.refreshUserlist();
@@ -144,13 +145,13 @@ public class ClientThread implements Runnable {
 			}
 		}
 		//Status der Prüfung mitteilen
-		synchronized (send) {
-			send.write(logon);
-			send.flush();
+		synchronized (snd) {
+			snd.writeObject(new MSSDataObject(logon));
+			snd.flush();
 		}
 		//Bei Erfolg den anderen Teilnehmern den neuen Benutzer bekannt machen
-		if (logon == Commands.LOGIN_SUCCESS) {
-			sci.notifyOthers(Commands.BC_NEWUSER, this);
+		if (logon == MSSDataObject.LOGIN_SUCCESS) {
+			sci.notifyOthers(MSSDataObject.BC_NEWUSER, this);
 		}
 	}
 

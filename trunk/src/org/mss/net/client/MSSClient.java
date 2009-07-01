@@ -1,28 +1,28 @@
 package org.mss.net.client;
 
-import org.mss.types.Commands;
+import org.mss.types.MSSDataObject;
 import org.mss.windows.ClientMainWin;
 import org.mss.windows.NoticeWin;
 import org.mss.windows.QueryWinDouble;
 import org.mss.windows.QueryWinYesNo;
 
 import java.awt.Dimension;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.*;
 
 /*
  * Spielerhauptklasse
  */
 public class MSSClient {
-	
+
 	public static void main(String[] args) {
 
 		Socket server = null;
 		String addr = "localhost";
 		int port = 62742;	
+		String username = "";
 
 		QueryWinDouble gwd = new QueryWinDouble("Verbindungsangaben","Host", "Port", "Ok", addr, Integer.toString(port), new Dimension(300,100));
 		QueryWinYesNo qyn;
@@ -42,108 +42,129 @@ public class MSSClient {
 			try {
 				server = new Socket(addr, port);
 				tryAgain = true;
-				PrintWriter send = new PrintWriter(server.getOutputStream());
-				BufferedReader read = new BufferedReader(new InputStreamReader(server.getInputStream()));
+				ObjectOutputStream snd = new ObjectOutputStream(server.getOutputStream());
+				snd.flush();
+				//Damit Gegenstelle InputStream öffnen kann
+				ObjectInputStream red = new ObjectInputStream(server.getInputStream());
 				if (guiCMainWin == null) {
-					guiCMainWin = new ClientMainWin(send);
+					guiCMainWin = new ClientMainWin(snd);
 				}
-				int command = 0;
+
 				boolean resume = true;
 				//Auf Befehle warten solange nichts gegenteiliges Empfangen wurde oder eintritt
 				while (resume) {
-					switch (command = read.read()) {
-					case Commands.SND_LOGIN:
-						guiCMainWin.setUsername(login(send));
+					MSSDataObject inData = null;
+					try {
+						inData = (MSSDataObject) red.readObject();
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					switch (inData.getType()) {//command = read.read()) {
+					case MSSDataObject.SND_LOGIN:
+						username = login(snd);
 						break;
 					case 63://Jaja der falsche Login Code
-					case Commands.LOGIN_SUCCESS:
+					case MSSDataObject.LOGIN_SUCCESS:
 						wasLoggedIn = true;
 						System.out.println("Erfolgreich angemeldet");
+						guiCMainWin.setUsername(username);
 						guiCMainWin.setVisible(true);
 						break;
-					case Commands.LOGIN_FAILED:
+					case MSSDataObject.LOGIN_FAILED:
 						qyn = new QueryWinYesNo ("Anmeldung fehlgeschlagen!", "Anmeldung fehlgeschlagen. Erneut versuchen?", new Dimension(300,100));
 						qyn.show();
 						if (qyn.getAnswer()) {
-							guiCMainWin.setUsername(login(send));// Erneute Anmeldung
+							username = login(snd);// Erneute Anmeldung
 						} else {
 							resume = false;
 						}
 						break;
-					case Commands.LOGIN_PASSWRONG:
+					case MSSDataObject.LOGIN_PASSWRONG:
 						qyn = new QueryWinYesNo ("Passwort falsch!", "Falsches Passwort! Erneut versuchen?", new Dimension(300,100));
 						qyn.show();
 						if (qyn.getAnswer()) {
-							guiCMainWin.setUsername(login(send));// Erneute Anmeldung
+							username = login(snd);// Erneute Anmeldung
 						} else {
 							resume = false;
 						}
 						break;
-					case Commands.LOGIN_ALREADY_ON:
+					case MSSDataObject.LOGIN_ALREADY_ON:
 						qyn = new QueryWinYesNo ("Bereits online!", "Es ist Bereits ein Benutzer mit diesen Namen online. Als anderer Benutzer anmelden?", new Dimension(300,100));
 						qyn.show();
 						if (qyn.getAnswer()) {
-							guiCMainWin.setUsername(login(send));//Erneute Anmeldung
+							username = login(snd);//Erneute Anmeldung
 						} else {
 							resume = false;
 						}
 						break;
-					case Commands.LOGIN_BAN:
+					case MSSDataObject.LOGIN_BAN:
 						nw = new NoticeWin("Gebannt!", "Benutzer ist vom Server gebannt!", new Dimension(300,100));
 						nw.show();
 						resume = false;
 						break;
-					case Commands.BC_NEWUSER:
-						String user = read.readLine();
+					case MSSDataObject.BC_NEWUSER:
+						String user = inData.getFromUser().getName();
 						guiCMainWin.addUser(user);
 						guiCMainWin.addMessage(user + " hat sich angemeldet!");
 						break;
-					case Commands.BC_USEROFF:
-						String usr = read.readLine();
+					case MSSDataObject.BC_USEROFF:
+						String usr = inData.getFromUser().getName();
 						guiCMainWin.removeUser(usr);
 						guiCMainWin.addMessage(usr + " hat sich abgemeldet!");
 						break;
-					case Commands.USER_WARN:
-						if (read.read() == Commands.USER_SELF) {
-							guiCMainWin.addMessage("Du wurdest verwarnt! Grund:" + read.readLine());
+					case MSSDataObject.USER_WARN://ATTN nicht einfach so verschieben Code in USER_BAN wichtig
+					case MSSDataObject.USER_KICK:// -''-
+					case MSSDataObject.USER_BAN:
+						String nameIt = "";
+						switch (inData.getType()) {
+						case MSSDataObject.USER_WARN:
+							nameIt = "verwarnt"; 
+							break;
+						case MSSDataObject.USER_KICK:
+							nameIt = "gekickt";
+							break;
+						case MSSDataObject.USER_BAN:
+							nameIt = "gebannt";
+							break;
+						}
+						
+						if (inData.getFromUser().getName().contentEquals(username)) {
+							guiCMainWin.addMessage("Du wurdest " + nameIt + "! Grund:" + inData.getData()); //+ read.readLine());
 						} else {
-							read.readLine();
+							guiCMainWin.addMessage("Benutzer " + inData.getFromUser().getName()+ " wurde " + nameIt + "! Grund:" + inData.getData());
 						}
 						break;
-					case Commands.USER_KICK:
-						if (read.read() == Commands.USER_SELF) {
-							guiCMainWin.addMessage("Du wurdest vom Server gekickt! Grund:" + read.readLine());
-						} else {
-							read.readLine();
-						}
-						break;
-					case Commands.USER_BAN:
-						if (read.read() == Commands.USER_SELF) {
-							guiCMainWin.addMessage("Du wurdest vom Server gebannt! Grund:" + read.readLine());
-						} else {
-							read.readLine();
-						}
-						break;
-					case Commands.USERLIST:
-						String[] users = read.readLine().split("\t");
+//					case MSSDataObject.USER_KICK:
+//						if (inData.getFromUser().getName().contentEquals(username)) {
+//							guiCMainWin.addMessage("Du wurdest vom Server gekickt! Grund:" + inData.getData());//+ read.readLine());
+//						} else {
+//							guiCMainWin.addMessage("Benutzer " + inData.getFromUser().getName()+ " wurde gekickt! Grund:" + inData.getData());
+//						}
+//						break;
+//					case MSSDataObject.USER_BAN:
+//						if (inData.getFromUser().getName().contentEquals(username)) {
+//							guiCMainWin.addMessage("Du wurdest vom Server gebannt! Grund:" + inData.getData());//+ read.readLine());
+//						} else {
+//							guiCMainWin.addMessage("Benutzer " + inData.getFromUser().getName()+ " wurde gebannt! Grund:" + inData.getData());
+//						}
+//						break;
+					case MSSDataObject.USERLIST:
+						String[] users = ((String) inData.getData()).split("\t");
 						for (int i = 0; i < users.length; i++) {
 							guiCMainWin.addUser(users[i]);
 						}
 						break;
-					case Commands.ACTION_FORBIDDEN:
-						guiCMainWin.addMessage(read.readLine());
+					case MSSDataObject.ACTION_FORBIDDEN:
+						guiCMainWin.addMessage((String) inData.getData());
 						break;
-					case Commands.BC_MESSAGE:
-						int length = read.read();
-						for (int i = 0; i < length; i++) {
-							guiCMainWin.addMessage(read.readLine());
-						}
+					case MSSDataObject.BC_MESSAGE:
+						guiCMainWin.addMessage(inData.getFromUser().getName() + ":" + (String)inData.getData());
 						break;
 					case -1:
 						throw new SocketException();
 					default:
-						System.out.println("Falscher Code Erhalten" + command);
-						guiCMainWin.addMessage("Unbekannten Befehl erhalten:" + command);
+						guiCMainWin.addMessage("Unbekannten Befehl erhalten:" + inData.getType());
 					}
 				}
 				server.close();
@@ -182,14 +203,14 @@ public class MSSClient {
 		guiCMainWin = null;
 	}
 
-	public static String login(PrintWriter send) {
+	public static String login(ObjectOutputStream snd) throws IOException {
 		QueryWinDouble gwd = new QueryWinDouble("Logindaten", "Benutzername", "Passwort", "Ok", "Phil", "0", new Dimension(300,100));
 		gwd.show();
 		if (gwd.isCanceled()) System.exit(0);
 		
-		send.write(Commands.SND_LOGIN);
-		send.append(gwd.getInput1Text().replace("\\", "") + "\t" + gwd.getInput2Text().replace("\\", "") + "\n");
-		send.flush();
+		snd.writeObject(new MSSDataObject(MSSDataObject.SND_LOGIN, gwd.getInput1Text().replace("\\", "") + "\t" + gwd.getInput2Text().replace("\\", "")));
+		snd.flush();
+
 		return gwd.getInput1Text().replace("\\", "");
 	}
 

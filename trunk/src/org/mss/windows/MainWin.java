@@ -24,7 +24,7 @@ import javax.swing.JTextArea;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.mss.net.server.SharedClientInfo;
-import org.mss.types.Commands;
+import org.mss.types.MSSDataObject;
 
 public class MainWin {
 	SharedClientInfo sci = SharedClientInfo.getInstance();
@@ -103,19 +103,19 @@ public class MainWin {
 
 		mIWarn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				sendAllSelected(Commands.USER_WARN);
+				sendAllSelected(MSSDataObject.USER_WARN);
 			}
 		});
 
 		mIKick.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				sendAllSelected(Commands.USER_KICK);
+				sendAllSelected(MSSDataObject.USER_KICK);
 			}
 		});
 
 		mIBan.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				sendAllSelected(Commands.USER_BAN);
+				sendAllSelected(MSSDataObject.USER_BAN);
 			}
 		});
 	}
@@ -123,7 +123,7 @@ public class MainWin {
 	private void sendMessage() {
 		//Nachricht abschicken
 		if (input.getText().contentEquals("")) return;
-		sci.notifyOthers(Commands.BC_MESSAGE, input.getText(), null);
+		sci.notifyOthers(MSSDataObject.BC_MESSAGE, input.getText(), null);
 		addMessage("Admin:"+input.getText(), COLOR_SELF);
 		input.setText("");		
 	}
@@ -140,8 +140,8 @@ public class MainWin {
 						int[] users = userlist.getSelectedIndices();
 						for (int i = 0; i < users.length; i++) {
 							sci.notifyOthers(typeOfPunishment, reason, sci.getSiblings().get(users[i]));
-							if (typeOfPunishment != Commands.USER_WARN) {
-								if (typeOfPunishment == Commands.USER_BAN) {
+							if (typeOfPunishment != MSSDataObject.USER_WARN) {
+								if (typeOfPunishment == MSSDataObject.USER_BAN) {
 									sci.addUser(sci.getSiblings().get(users[i]).username,true);
 								}
 								sci.getSiblings().remove(users[i]).close();
