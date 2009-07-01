@@ -6,7 +6,8 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.mss.types.Commands;
+import org.mss.Spieler;
+import org.mss.types.MSSDataObject;
 import org.mss.utils.Console;
 
 public class SharedClientInfo {
@@ -73,7 +74,7 @@ public class SharedClientInfo {
 	 * Sucht nach dem Benutzer in der Benutzerdatei
 	 */
 	public int findUser(String credentials) {
-		int logon = Commands.LOGIN_FAILED;
+		int logon = MSSDataObject.LOGIN_FAILED;
 		synchronized (users) {
 			try {
 				users.seek(0);
@@ -83,7 +84,7 @@ public class SharedClientInfo {
 					if ((user = users.readLine()) == null)
 						break;
 					if (user.contains(credentials.subSequence(0, credentials.indexOf("\t")))) {
-						logon = user.contentEquals(credentials) ? Commands.LOGIN_SUCCESS : Commands.LOGIN_PASSWRONG;
+						logon = user.contentEquals(credentials) ? MSSDataObject.LOGIN_SUCCESS : MSSDataObject.LOGIN_PASSWRONG;
 						// Benutzerkennung korrekt oder falsches Passwort
 						break;
 					}
@@ -141,66 +142,48 @@ public class SharedClientInfo {
 	 */
 	public void notifyOthers(int type, String message, ClientThread sender) {
 		String name = (sender != null)? sender.username:"Admin";
-		if (type == Commands.BC_MESSAGE && sender != null) {
+		if (type == MSSDataObject.BC_MESSAGE && sender != null) {
 			sender.window.addMessage(name + ":" + message, name.hashCode());
 		}
 		synchronized (sci.getSiblings()) {
 			//Alle Teilnehmer durchschleifen und entsprechenden Befehlscode setzen und Nachricht anhängen
 			for (int i = 0; i < sci.getSiblings().size(); i++) {
 				ClientThread sibling = sci.getSiblings().get(i);
+				Object data = message;
+				Spieler fromUser = new Spieler(name);
 				if (sibling != sender) {
-					synchronized (sibling.send) {
-						sibling.send.write(type);
-						switch (type) {
-						case Commands.USER_WARN:
-							sibling.send.write(Commands.USER_OTHER);
-							sibling.send.println(name + " wurde verwarnt. (Grund:" + message + ")");
-							break;
-						case Commands.USER_KICK:
-							sibling.send.write(Commands.USER_OTHER);
-							sibling.send.println(name + " wurde gekickt. (Grund:" + message + ")");
-							break;
-						case Commands.USER_BAN:
-							sibling.send.write(Commands.USER_OTHER);
-							sibling.send.println(name + " wurde gebannt. (Grund:" + message + ")");
-							break;
-						case Commands.BC_NEWUSER: // ATT:Nicht einfach
-													// vertauschen Code von
-													// USEROFF nötig
-						case Commands.BC_USEROFF:
-							sibling.send.println(name);
-							break;
-						case Commands.BC_MESSAGE:
-							sibling.send.write(message.split("\n").length);
-							sibling.send.println(name + ":" + message);
-							break;
-						default:
-							break;
+					synchronized (sibling.snd) {
+						try {
+							sibling.snd.writeObject(new MSSDataObject(type,data, fromUser));
+							sibling.snd.flush();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-						sibling.send.flush();
 					}
 				} else {
 					//Besondere Nachrichten die an sich selbst geschickt werden müssen
-					synchronized (sender.send) {
+					synchronized (sender.snd) {
 						switch (type) {
-						case Commands.BC_NEWUSER:
-							sender.send.write(Commands.USERLIST);
+						case MSSDataObject.BC_NEWUSER:
 							//Die Liste mit allen aktuellen Teilnehmern schicken
+							type=MSSDataObject.USERLIST;
 							Iterator<ClientThread> it = SharedClientInfo.siblings.iterator();
+							message = "";
 							while (it.hasNext()) {
-								sender.send.print(it.next().username + "\t");
+								message += it.next().username + "\t";
 							}
-							sender.send.println();
 							break;
-						case Commands.USER_WARN://ATT nicht einfach verschieben
-						case Commands.USER_KICK:
-						case Commands.USER_BAN:
-							sender.send.write(type);
-							sender.send.write(Commands.USER_SELF);
-							sender.send.println(message);
-							break;
+						case MSSDataObject.BC_USEROFF:
+							continue;//Warum sich selber die Nachricht schicken? Wird wohl wissen das man offline geht :D
 						}
-						sender.send.flush();
+						try {
+							sender.snd.writeObject(new MSSDataObject(type, message, fromUser));
+							sender.snd.flush();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 			}

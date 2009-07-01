@@ -12,7 +12,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionEvent;
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -24,7 +25,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.html.HTMLEditorKit;
 
-import org.mss.types.Commands;
+import org.mss.types.MSSDataObject;
+
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -40,7 +42,7 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 	JButton bClose = new JButton("Schlieﬂen");
 	JEditorPane messages = new JEditorPane();
 
-	PrintWriter send;
+	ObjectOutputStream snd;
 	Vector<String> users = new Vector<String>();
 	String username = "";
 	String htmlStart = "<html><body>";
@@ -91,33 +93,32 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 		this.username = username;
 	}
 
-	public ClientMainWin(PrintWriter send) {
-		this.send = send;
+	public ClientMainWin(ObjectOutputStream snd) {
+		this.snd = snd;
 		this.setResizable(true);
 		this.setLocationRelativeTo(null);
-		Container c = this.getContentPane();
 		GridBagLayout gbl = new GridBagLayout();
-		c.setLayout(gbl);
+		this.setLayout(gbl);
 
 		// User-Feld
-		setComp(c, gbl, new JScrollPane(userlist), 0, 0, 4, 1);
+		setComp(this, gbl, new JScrollPane(userlist), 0, 0, 4, 1);
 		userlist.setCellRenderer(new HashColorCellRenderer());
 		
 		// Ausgabe-Feld
 		messages.setEditable(false);
 		messages.setEditorKit(new HTMLEditorKit());
-		setComp(c, gbl, new JScrollPane(messages), 1, 0, 3, 1);
+		setComp(this, gbl, new JScrollPane(messages), 1, 0, 3, 1);
 
 		// Eingabe-Feld
-		setComp(c, gbl, new JScrollPane(txtSend), 1, 3, 1, 1);
+		setComp(this, gbl, new JScrollPane(txtSend), 1, 3, 1, 1);
 		txtSend.addKeyListener(this);
 
 		// Close-Button
-		setComp(c, gbl, bClose, 2, 0, 1, 1);
+		setComp(this, gbl, bClose, 2, 0, 1, 1);
 		bClose.addActionListener(this);
 
 		// Send-Button
-		setComp(c, gbl, bSend, 2, 3, 1, 1);
+		setComp(this, gbl, bSend, 2, 3, 1, 1);
 		bSend.addActionListener(this);
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
@@ -173,15 +174,15 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 	}
 
 	public void send() {
-		synchronized (send) {
+		synchronized (snd) {
 			addMessage(username +":"+ txtSend.getText());
-			this.send.write(Commands.BC_MESSAGE);
-			String[] lines = txtSend.getText().split("\n");
-			this.send.write(lines.length);
-			for (int i = 0; i < lines.length; i++) {
-				send.println(lines[i]);
+			try {
+				snd.writeObject(new MSSDataObject(MSSDataObject.BC_MESSAGE, txtSend.getText()));
+				snd.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			send.flush();
 		}
 		txtSend.setText("");
 	}
