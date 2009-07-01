@@ -62,14 +62,13 @@ public class MSSClient {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					switch (inData.getType()) {//command = read.read()) {
+					switch (inData.getType()) {
 					case MSSDataObject.SND_LOGIN:
 						login(snd);
 						break;
 					case 63://Jaja der falsche Login Code
 					case MSSDataObject.LOGIN_SUCCESS:
 						wasLoggedIn = true;
-						System.out.println("Erfolgreich angemeldet");
 						myself =(Spieler) inData.getData();
 						guiCMainWin.setUsername(myself.getName());
 						guiCMainWin.setVisible(true);
@@ -195,15 +194,13 @@ public class MSSClient {
 		guiCMainWin = null;
 	}
 
-	public static String login(ObjectOutputStream snd) throws IOException {
+	public static void login(ObjectOutputStream snd) throws IOException {
 		QueryWinDouble gwd = new QueryWinDouble("Logindaten", "Benutzername", "Passwort", "Ok", "Phil", "0", new Dimension(300,100));
 		gwd.show();
 		if (gwd.isCanceled()) System.exit(0);
 		
 		snd.writeObject(new MSSDataObject(MSSDataObject.SND_LOGIN, gwd.getInput1Text().replace("\\", "") + "\t" + gwd.getInput2Text().replace("\\", "")));
 		snd.flush();
-
-		return gwd.getInput1Text().replace("\\", "");
 	}
 
 }

@@ -183,7 +183,6 @@ public class SharedClientInfo {
 							continue;//Warum sich selber die Nachricht schicken?
 						}
 						try {
-							System.out.println(type + " "+data.toString());
 							sender.snd.writeObject(new MSSDataObject(type, data, fromUser));
 							sender.snd.flush();
 						} catch (IOException e) {
