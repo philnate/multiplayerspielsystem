@@ -1,5 +1,6 @@
 package org.mss.net.client;
 
+import org.mss.Spieler;
 import org.mss.types.MSSDataObject;
 import org.mss.windows.ClientMainWin;
 import org.mss.windows.NoticeWin;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.*;
+import java.util.ArrayList;
 
 /*
  * Spielerhauptklasse
@@ -22,8 +24,8 @@ public class MSSClient {
 		Socket server = null;
 		String addr = "localhost";
 		int port = 62742;	
-		String username = "";
-
+		Spieler myself = null;
+		ArrayList<Spieler> users = new ArrayList<Spieler>(10);
 		QueryWinDouble gwd = new QueryWinDouble("Verbindungsangaben","Host", "Port", "Ok", addr, Integer.toString(port), new Dimension(300,100));
 		QueryWinYesNo qyn;
 		NoticeWin nw;
@@ -62,20 +64,21 @@ public class MSSClient {
 					}
 					switch (inData.getType()) {//command = read.read()) {
 					case MSSDataObject.SND_LOGIN:
-						username = login(snd);
+						login(snd);
 						break;
 					case 63://Jaja der falsche Login Code
 					case MSSDataObject.LOGIN_SUCCESS:
 						wasLoggedIn = true;
 						System.out.println("Erfolgreich angemeldet");
-						guiCMainWin.setUsername(username);
+						myself =(Spieler) inData.getData();
+						guiCMainWin.setUsername(myself.getName());
 						guiCMainWin.setVisible(true);
 						break;
 					case MSSDataObject.LOGIN_FAILED:
 						qyn = new QueryWinYesNo ("Anmeldung fehlgeschlagen!", "Anmeldung fehlgeschlagen. Erneut versuchen?", new Dimension(300,100));
 						qyn.show();
 						if (qyn.getAnswer()) {
-							username = login(snd);// Erneute Anmeldung
+							login(snd);// Erneute Anmeldung
 						} else {
 							resume = false;
 						}
@@ -84,7 +87,7 @@ public class MSSClient {
 						qyn = new QueryWinYesNo ("Passwort falsch!", "Falsches Passwort! Erneut versuchen?", new Dimension(300,100));
 						qyn.show();
 						if (qyn.getAnswer()) {
-							username = login(snd);// Erneute Anmeldung
+							login(snd);// Erneute Anmeldung
 						} else {
 							resume = false;
 						}
@@ -93,7 +96,7 @@ public class MSSClient {
 						qyn = new QueryWinYesNo ("Bereits online!", "Es ist Bereits ein Benutzer mit diesen Namen online. Als anderer Benutzer anmelden?", new Dimension(300,100));
 						qyn.show();
 						if (qyn.getAnswer()) {
-							username = login(snd);//Erneute Anmeldung
+							login(snd);//Erneute Anmeldung
 						} else {
 							resume = false;
 						}
@@ -104,14 +107,16 @@ public class MSSClient {
 						resume = false;
 						break;
 					case MSSDataObject.BC_NEWUSER:
-						String user = inData.getFromUser().getName();
-						guiCMainWin.addUser(user);
-						guiCMainWin.addMessage(user + " hat sich angemeldet!");
+						Spieler user = inData.getFromUser();
+						users.add(user);
+						guiCMainWin.addMessage(user.getName() + " hat sich angemeldet!");
+						guiCMainWin.refreshUsers(users);
 						break;
 					case MSSDataObject.BC_USEROFF:
-						String usr = inData.getFromUser().getName();
-						guiCMainWin.removeUser(usr);
-						guiCMainWin.addMessage(usr + " hat sich abgemeldet!");
+						Spieler usr = inData.getFromUser();
+						users.remove(usr);
+						guiCMainWin.addMessage(usr.getName() + " hat sich abgemeldet!");
+						guiCMainWin.refreshUsers(users);
 						break;
 					case MSSDataObject.USER_WARN://ATTN nicht einfach so verschieben Code in USER_BAN wichtig
 					case MSSDataObject.USER_KICK:// -''-
@@ -129,31 +134,18 @@ public class MSSClient {
 							break;
 						}
 						
-						if (inData.getFromUser().getName().contentEquals(username)) {
+						if (inData.getFromUser() == myself) {
 							guiCMainWin.addMessage("Du wurdest " + nameIt + "! Grund:" + inData.getData()); //+ read.readLine());
 						} else {
 							guiCMainWin.addMessage("Benutzer " + inData.getFromUser().getName()+ " wurde " + nameIt + "! Grund:" + inData.getData());
 						}
 						break;
-//					case MSSDataObject.USER_KICK:
-//						if (inData.getFromUser().getName().contentEquals(username)) {
-//							guiCMainWin.addMessage("Du wurdest vom Server gekickt! Grund:" + inData.getData());//+ read.readLine());
-//						} else {
-//							guiCMainWin.addMessage("Benutzer " + inData.getFromUser().getName()+ " wurde gekickt! Grund:" + inData.getData());
-//						}
-//						break;
-//					case MSSDataObject.USER_BAN:
-//						if (inData.getFromUser().getName().contentEquals(username)) {
-//							guiCMainWin.addMessage("Du wurdest vom Server gebannt! Grund:" + inData.getData());//+ read.readLine());
-//						} else {
-//							guiCMainWin.addMessage("Benutzer " + inData.getFromUser().getName()+ " wurde gebannt! Grund:" + inData.getData());
-//						}
-//						break;
 					case MSSDataObject.USERLIST:
-						String[] users = ((String) inData.getData()).split("\t");
-						for (int i = 0; i < users.length; i++) {
-							guiCMainWin.addUser(users[i]);
+						Spieler[] curUsers = (Spieler[]) inData.getData();
+						for (int i = 0; i < curUsers.length; i++) {
+							users.add(curUsers[i]);
 						}
+						guiCMainWin.refreshUsers(users);
 						break;
 					case MSSDataObject.ACTION_FORBIDDEN:
 						guiCMainWin.addMessage((String) inData.getData());

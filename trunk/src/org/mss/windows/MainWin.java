@@ -12,6 +12,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
@@ -23,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.mss.net.server.ClientThread;
 import org.mss.net.server.SharedClientInfo;
 import org.mss.types.MSSDataObject;
 
@@ -142,7 +146,7 @@ public class MainWin {
 							sci.notifyOthers(typeOfPunishment, reason, sci.getSiblings().get(users[i]));
 							if (typeOfPunishment != MSSDataObject.USER_WARN) {
 								if (typeOfPunishment == MSSDataObject.USER_BAN) {
-									sci.addUser(sci.getSiblings().get(users[i]).username,true);
+									sci.addUser(sci.getSiblings().get(users[i]).myself.getName(),true);
 								}
 								sci.getSiblings().remove(users[i]).close();
 							}
@@ -178,7 +182,14 @@ public class MainWin {
 	}
 
 	public void refreshUserlist() {
-		synchronized(sci.getSiblings()) {
+		synchronized (sci.getSiblings()) {
+			//TODO Ordner der Benutzer klappt nicht...
+//			ArrayList<ClientThread> users = (ArrayList<ClientThread>) sci.getSiblings().clone(); 
+//			Collections.sort(users, new Comparator<ClientThread>() {
+//				public int compare(ClientThread s1, ClientThread s2) {
+//					return s1.myself.getName().compareTo(s2.myself.getName());
+//				}
+//			});
 			userlist.setListData(sci.getSiblingsArray());
 		}
 	}
