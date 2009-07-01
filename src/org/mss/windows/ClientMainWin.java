@@ -14,7 +14,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.Iterator;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -25,8 +24,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.mss.Spieler;
 import org.mss.types.MSSDataObject;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -53,41 +54,6 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 	public final int COLOR_NORMAL = 0x2;
 	public final int COLOR_IMPORTANT = 0x3;
 	public final int COLOR_SELF = 0x4;
-
-	public void addUser(String user) {
-		synchronized (users) {
-			Iterator<String> it = users.iterator();
-			while (it.hasNext()) {
-				if (it.next().contentEquals(user)) {
-					return;// Benutzer steht weshalb auch immer bereits in
-							// Liste;
-				}
-			}
-			users.add(user);
-			//Bisschen nett sortieren :D
-			Collections.sort(users, new Comparator<String>(){
-				public int compare(String s1, String s2) {
-					return s1.compareTo(s2);
-				}
-			});
-			userlist.setListData(users);
-		}
-	}
-
-	public void removeUser(String user) {
-		synchronized (users) {
-			Iterator<String> it = users.iterator();
-			while (it.hasNext()) {
-				String curUser = it.next();
-				if (curUser.contentEquals(user)) {
-					it = null;
-					users.remove(curUser);
-					break;
-				}
-			}
-			userlist.setListData(users);
-		}
-	}
 
 	public void setUsername(String username) {
 		this.username = username;
@@ -166,7 +132,14 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 			send();
 		}
 	}
-
+	public void refreshUsers(ArrayList<Spieler> users) {
+		Collections.sort(users, new Comparator<Spieler>(){
+		public int compare(Spieler s1, Spieler s2) {
+			return s1.getName().compareTo(s2.getName());
+		}
+	});
+		userlist.setListData(users.toArray());
+	}
 	public void keyReleased(KeyEvent e) {
 	}
 

@@ -6,6 +6,7 @@ import java.net.SocketException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.mss.Spieler;
 import org.mss.types.MSSDataObject;
 import org.mss.utils.Console;
 import org.mss.windows.MainWin;
@@ -17,10 +18,10 @@ public class ClientThread implements Runnable {
 	private Socket client = null;
 	protected ObjectOutputStream snd = null;
 	private ObjectInputStream red = null;
-	public String username = "";
 	private static SharedClientInfo sci = SharedClientInfo.getInstance();
 	protected MainWin window = null;
 	private boolean kicked = false;
+	public Spieler myself;
 
 	public void run() {
 		//Wenn zum ersten mal gestartet laden der Benutzerdatei
@@ -35,7 +36,6 @@ public class ClientThread implements Runnable {
 				snd.flush();
 			}
 			boolean resume = true;
-			int command = 0;
 			//Gucken was der Benutzer sendet und dem entsprechend verfahren
 			while (resume) {
 				MSSDataObject inData = null;
@@ -45,13 +45,12 @@ public class ClientThread implements Runnable {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-//				switch (command = read.read()) {
 				switch (inData.getType()) {
 				case MSSDataObject.SND_LOGIN:
 					checkLogin(inData);
 					break;
 				case MSSDataObject.BC_MESSAGE:
-					if (!username.contentEquals("")) {
+					if (myself != null/*!username.contentEquals("")*/) {
 						sci.notifyOthers(MSSDataObject.BC_MESSAGE, (String) inData.getData()/*message*/, this);
 					} else {
 						synchronized(snd) {
@@ -63,13 +62,13 @@ public class ClientThread implements Runnable {
 				case -1:
 					throw new SocketException();
 				default:
-					Console.write("Unbekannten Clientcode " + command + " erhalten");
+					Console.write("Unbekannten Clientcode " + inData.getType() + " erhalten");
 				}
 			}
 		} catch (IOException e) {
 			if (e.getClass() == SocketException.class) {
 				//Verbindung wurde getrennt also im Server anzeigen
-				window.addMessage("Verbindung von Benutzer " + username + " wurde getrennt.",window.COLOR_NOTE);
+				window.addMessage("Verbindung von Benutzer " + myself.getName() + " wurde getrennt.",window.COLOR_NOTE);
 			} else {
 				e.printStackTrace();
 			}
@@ -122,7 +121,7 @@ public class ClientThread implements Runnable {
 			synchronized (snd) {
 				snd.writeObject(MSSDataObject.LOGIN_BAN);
 				snd.flush();
-				username = credentials.split("\t")[0] + "(gebannt)";
+				myself = new Spieler(credentials.split("\t")[0] + "(gebannt)");
 				throw new SocketException();
 			}
 		}
@@ -138,15 +137,15 @@ public class ClientThread implements Runnable {
 			}
 			//Anmeldung hat funktioniert. Also hinzufügen und Namen setzen
 			if (logon == MSSDataObject.LOGIN_SUCCESS) {
-				username = credentials.split("\t")[0];
+				myself = new Spieler(credentials.split("\t")[0]);
 				sci.addSibling(this);
 				window.refreshUserlist();
-				window.addMessage("Neuer Teilnehmer:" + username, window.COLOR_NOTE);
+				window.addMessage("Neuer Teilnehmer:" + myself.getName(), window.COLOR_NOTE);
 			}
 		}
 		//Status der Prüfung mitteilen
 		synchronized (snd) {
-			snd.writeObject(new MSSDataObject(logon));
+			snd.writeObject(new MSSDataObject(logon,myself));
 			snd.flush();
 		}
 		//Bei Erfolg den anderen Teilnehmern den neuen Benutzer bekannt machen
@@ -156,6 +155,6 @@ public class ClientThread implements Runnable {
 	}
 
 	public String toString() {
-		return username;
+		return myself.getName();
 	}
 }

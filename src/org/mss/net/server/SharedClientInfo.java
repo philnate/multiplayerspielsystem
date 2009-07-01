@@ -61,7 +61,7 @@ public class SharedClientInfo {
 		synchronized(siblings) {
 			Iterator<ClientThread> it = siblings.iterator();
 			while(it.hasNext()) {
-				if (it.next().username.contentEquals(username)) {
+				if (it.next().myself.getName().contentEquals(username)) {
 					return true;
 				}
 			}
@@ -141,7 +141,7 @@ public class SharedClientInfo {
 	 * Übermitteln von Nachrichten an alle anderen Teilnehmer und evtl sich selbst
 	 */
 	public void notifyOthers(int type, String message, ClientThread sender) {
-		String name = (sender != null)? sender.username:"Admin";
+		String name = (sender != null)? sender.myself.getName():"Admin";
 		if (type == MSSDataObject.BC_MESSAGE && sender != null) {
 			sender.window.addMessage(name + ":" + message, name.hashCode());
 		}
@@ -150,7 +150,7 @@ public class SharedClientInfo {
 			for (int i = 0; i < sci.getSiblings().size(); i++) {
 				ClientThread sibling = sci.getSiblings().get(i);
 				Object data = message;
-				Spieler fromUser = new Spieler(name);
+				Spieler fromUser = sender.myself;//new Spieler(name);
 				if (sibling != sender) {
 					synchronized (sibling.snd) {
 						try {
@@ -169,16 +169,22 @@ public class SharedClientInfo {
 							//Die Liste mit allen aktuellen Teilnehmern schicken
 							type=MSSDataObject.USERLIST;
 							Iterator<ClientThread> it = SharedClientInfo.siblings.iterator();
-							message = "";
+							
+							Spieler[] users = new Spieler[SharedClientInfo.siblings.size()];
+							int j = 0;
 							while (it.hasNext()) {
-								message += it.next().username + "\t";
+								users[j] = it.next().myself;
+								j++;
 							}
+							data = users;
 							break;
 						case MSSDataObject.BC_USEROFF:
-							continue;//Warum sich selber die Nachricht schicken? Wird wohl wissen das man offline geht :D
+						case MSSDataObject.BC_MESSAGE:
+							continue;//Warum sich selber die Nachricht schicken?
 						}
 						try {
-							sender.snd.writeObject(new MSSDataObject(type, message, fromUser));
+							System.out.println(type + " "+data.toString());
+							sender.snd.writeObject(new MSSDataObject(type, data, fromUser));
 							sender.snd.flush();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
