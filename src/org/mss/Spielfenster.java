@@ -74,7 +74,7 @@ public class Spielfenster extends JFrame implements MouseListener {
 		}
 
 		addComponent(this, gbl, field, 0, 0, 10, 10, 1, 1);
-		field.setPreferredSize(new Dimension(300,300));
+//		field.setPreferredSize(new Dimension(300,300));
 	}
 	//TODO dynamisch Spieler hinzufügen
 	public void setPlayer(Spieler[] spieler, String[] playerSigns) {
@@ -86,7 +86,6 @@ public class Spielfenster extends JFrame implements MouseListener {
 			signs[i].setSize(new Dimension(20,20));
 			players[i] = new JPanel();
 			players[i].setLayout(new GridLayout(1,2));
-//			players[i].setSize(new Dimension(20,100));
 			players[i].add(signs[i]);
 			players[i].add(names[i]);
 			addComponent(this, gbl, players[i], 11, i, 1, 1, 0, 0);
@@ -97,17 +96,17 @@ public class Spielfenster extends JFrame implements MouseListener {
 		positions[y][x].setPicture(picture, col);
 	}
 
-//	public static void main(String[] args) {
-//		Spieler[] spieler = new Spieler[2];
-//		String[] signs = new String[2];
-//		signs[0] = SVGPanel.CIRCLE;
-//		signs[1] = SVGPanel.CROSS;
-//		spieler[0] = new Spieler("Phil");
-//		spieler[1] = new Spieler("MeMe");
-//		Spielfenster fenster = new Spielfenster( 4, 4, SVGPanel.FULL);
-//		fenster.setPlayer(spieler, signs);
-//		fenster.setVisible(true);
-//	}
+	public static void main(String[] args) {
+		Spieler[] spieler = new Spieler[2];
+		String[] signs = new String[2];
+		signs[0] = SVGPanel.CIRCLE;
+		signs[1] = SVGPanel.CROSS;
+		spieler[0] = new Spieler("Phil");
+		spieler[1] = new Spieler("MeMe");
+		Spielfenster fenster = new Spielfenster( 20, 20, SVGPanel.FULL);
+		fenster.setPlayer(spieler, signs);
+		fenster.setVisible(true);
+	}
 
 	static void addComponent(Container cont, GridBagLayout gbl, Component c, int x, int y,
 			int width, int height, double weightx, double weighty ) { 

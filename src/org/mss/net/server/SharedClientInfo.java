@@ -158,10 +158,10 @@ public class SharedClientInfo {
 					fromUser = admin;
 				}
 				if (sibling != sender) {
-					synchronized (sibling.snd) {
+					synchronized (sibling.send) {
 						try {
-							sibling.snd.writeObject(new MSSDataObject(type,data, fromUser));
-							sibling.snd.flush();
+							sibling.send.writeObject(new MSSDataObject(type,data, fromUser));
+							sibling.send.flush();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -169,7 +169,7 @@ public class SharedClientInfo {
 					}
 				} else {
 					//Besondere Nachrichten die an sich selbst geschickt werden müssen
-					synchronized (sender.snd) {
+					synchronized (sender.send) {
 						switch (type) {
 						case MSSDataObject.BC_NEWUSER:
 							//Die Liste mit allen aktuellen Teilnehmern schicken
@@ -189,8 +189,8 @@ public class SharedClientInfo {
 							continue;//Warum sich selber die Nachricht schicken?
 						}
 						try {
-							sender.snd.writeObject(new MSSDataObject(type, data, fromUser));
-							sender.snd.flush();
+							sender.send.writeObject(new MSSDataObject(type, data, fromUser));
+							sender.send.flush();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
