@@ -3,6 +3,7 @@ package org.mss.net.server;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.io.EOFException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
@@ -44,14 +45,17 @@ public class ClientThread implements Runnable {
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} catch (EOFException e) {
+					//Verbindung wurde beendet
+					throw new SocketException();
 				}
 				switch (inData.getType()) {
 				case MSSDataObject.SND_LOGIN:
 					checkLogin(inData);
 					break;
 				case MSSDataObject.BC_MESSAGE:
-					if (myself != null/*!username.contentEquals("")*/) {
-						sci.notifyOthers(MSSDataObject.BC_MESSAGE, (String) inData.getData()/*message*/, this);
+					if (myself != null) {
+						sci.notifyOthers(MSSDataObject.BC_MESSAGE, (String) inData.getData(), this);
 					} else {
 						synchronized(snd) {
 							snd.writeObject(new MSSDataObject(MSSDataObject.ACTION_FORBIDDEN,"Nur angemeldete Benutzer dürfen Nachrichten schicken!"));
@@ -108,7 +112,7 @@ public class ClientThread implements Runnable {
 	 * Überprüfen der gelieferten Login Informationen
 	 */
 	public void checkLogin(MSSDataObject data) throws IOException {
-		String credentials = (String) data.getData();//read.readLine();
+		String credentials = (String) data.getData();
 		int logon = MSSDataObject.LOGIN_FAILED;//Per default wird Login nicht "akzeptiert"
 		if (credentials.toLowerCase().contains("admin")) {
 			synchronized (snd) {
@@ -122,7 +126,7 @@ public class ClientThread implements Runnable {
 				snd.writeObject(MSSDataObject.LOGIN_BAN);
 				snd.flush();
 				myself = new Spieler(credentials.split("\t")[0] + "(gebannt)");
-				throw new SocketException();
+				close();
 			}
 		}
 		if (sci.findSibling(credentials.split("\t")[0])) {

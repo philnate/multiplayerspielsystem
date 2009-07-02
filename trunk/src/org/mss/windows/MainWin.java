@@ -12,9 +12,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
@@ -26,7 +23,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.html.HTMLEditorKit;
 
-import org.mss.net.server.ClientThread;
 import org.mss.net.server.SharedClientInfo;
 import org.mss.types.MSSDataObject;
 

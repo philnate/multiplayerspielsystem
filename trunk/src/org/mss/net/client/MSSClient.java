@@ -61,12 +61,14 @@ public class MSSClient {
 					} catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+					} catch (ClassCastException e) {
+						//Verbindung wurde beendet, gebannt
+						inData = new MSSDataObject(MSSDataObject.LOGIN_BAN);
 					}
 					switch (inData.getType()) {
 					case MSSDataObject.SND_LOGIN:
 						login(snd);
 						break;
-					case 63://Jaja der falsche Login Code
 					case MSSDataObject.LOGIN_SUCCESS:
 						wasLoggedIn = true;
 						myself =(Spieler) inData.getData();
@@ -152,8 +154,6 @@ public class MSSClient {
 					case MSSDataObject.BC_MESSAGE:
 						guiCMainWin.addMessage(inData.getFromUser().getName() + ":" + (String)inData.getData());
 						break;
-					case -1:
-						throw new SocketException();
 					default:
 						guiCMainWin.addMessage("Unbekannten Befehl erhalten:" + inData.getType());
 					}
