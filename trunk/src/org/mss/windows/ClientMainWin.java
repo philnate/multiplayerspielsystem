@@ -20,8 +20,12 @@ import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.mss.Spieler;
@@ -42,14 +46,20 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 	JButton bSend = new JButton("Senden");
 	JButton bClose = new JButton("Schlieﬂen");
 	JEditorPane messages = new JEditorPane();
+	JPopupMenu menu = new JPopupMenu();
+	JMenu fourwins = new JMenu("Viergewinnt");
+	JMenu chomp = new JMenu("Chomp");
+	JMenuItem offline = new JMenuItem("Gegen PC");
+	JMenuItem online = new JMenuItem("Gegen Mensch");
 
-	ObjectOutputStream snd;
+
+	ObjectOutputStream send;
 	Vector<String> users = new Vector<String>();
 	String username = "";
 	String htmlStart = "<html><body>";
 	String htmlEnd = "</html></body>";
 	String chatLines = "";
-
+	
 	public final int COLOR_NOTE = 0x1;
 	public final int COLOR_NORMAL = 0x2;
 	public final int COLOR_IMPORTANT = 0x3;
@@ -59,8 +69,8 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 		this.username = username;
 	}
 
-	public ClientMainWin(ObjectOutputStream snd) {
-		this.snd = snd;
+	public ClientMainWin(ObjectOutputStream send) {
+		this.send = send;
 		this.setResizable(true);
 		this.setLocationRelativeTo(null);
 		GridBagLayout gbl = new GridBagLayout();
@@ -69,7 +79,16 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 		// User-Feld
 		setComp(this, gbl, new JScrollPane(userlist), 0, 0, 4, 1);
 		userlist.setCellRenderer(new HashColorCellRenderer());
-		
+		userlist.setComponentPopupMenu(menu);
+		userlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+		menu.add(fourwins);
+		menu.add(chomp);
+		fourwins.add(offline);
+		fourwins.add(online);
+		chomp.add(offline);
+		chomp.add(online);
+
 		// Ausgabe-Feld
 		messages.setEditable(false);
 		messages.setEditorKit(new HTMLEditorKit());
@@ -147,11 +166,11 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 	}
 
 	public void send() {
-		synchronized (snd) {
+		synchronized (send) {
 			addMessage(username +":"+ txtSend.getText());
 			try {
-				snd.writeObject(new MSSDataObject(MSSDataObject.BC_MESSAGE, txtSend.getText()));
-				snd.flush();
+				send.writeObject(new MSSDataObject(MSSDataObject.BC_MESSAGE, txtSend.getText()));
+				send.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

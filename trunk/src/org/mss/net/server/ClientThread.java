@@ -17,8 +17,8 @@ import org.mss.windows.MainWin;
  */
 public class ClientThread implements Runnable {
 	private Socket client = null;
-	protected ObjectOutputStream snd = null;
-	private ObjectInputStream red = null;
+	protected ObjectOutputStream send = null;
+	private ObjectInputStream read = null;
 	private static SharedClientInfo sci = SharedClientInfo.getInstance();
 	protected MainWin window = null;
 	private boolean kicked = false;
@@ -28,20 +28,20 @@ public class ClientThread implements Runnable {
 		//Wenn zum ersten mal gestartet laden der Benutzerdatei
 		try {
 			//Zur Liste der angemeldeten Clients hinzufügen
-			snd = new ObjectOutputStream(client.getOutputStream());
-			snd.flush();
-			red = new ObjectInputStream(client.getInputStream());
+			send = new ObjectOutputStream(client.getOutputStream());
+			send.flush();
+			read = new ObjectInputStream(client.getInputStream());
 
-			synchronized (snd) {
-				snd.writeObject(new MSSDataObject(MSSDataObject.SND_LOGIN));
-				snd.flush();
+			synchronized (send) {
+				send.writeObject(new MSSDataObject(MSSDataObject.SND_LOGIN));
+				send.flush();
 			}
 			boolean resume = true;
 			//Gucken was der Benutzer sendet und dem entsprechend verfahren
 			while (resume) {
 				MSSDataObject inData = null;
 				try {
-					inData = (MSSDataObject) red.readObject();
+					inData = (MSSDataObject) read.readObject();
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -57,9 +57,9 @@ public class ClientThread implements Runnable {
 					if (myself != null) {
 						sci.notifyOthers(MSSDataObject.BC_MESSAGE, (String) inData.getData(), this);
 					} else {
-						synchronized(snd) {
-							snd.writeObject(new MSSDataObject(MSSDataObject.ACTION_FORBIDDEN,"Nur angemeldete Benutzer dürfen Nachrichten schicken!"));
-							snd.flush();
+						synchronized(send) {
+							send.writeObject(new MSSDataObject(MSSDataObject.ACTION_FORBIDDEN,"Nur angemeldete Benutzer dürfen Nachrichten schicken!"));
+							send.flush();
 						}
 					}
 					break;
@@ -115,16 +115,16 @@ public class ClientThread implements Runnable {
 		String credentials = (String) data.getData();
 		int logon = MSSDataObject.LOGIN_FAILED;//Per default wird Login nicht "akzeptiert"
 		if (credentials.toLowerCase().contains("admin")) {
-			synchronized (snd) {
-				snd.writeObject(MSSDataObject.LOGIN_ALREADY_ON);
-				snd.flush();
+			synchronized (send) {
+				send.writeObject(MSSDataObject.LOGIN_ALREADY_ON);
+				send.flush();
 				return;
 			}		
 		}
 		if (sci.isBanned(credentials.split("\t")[0])) {//Wenn Benutzer gebannt sperren
-			synchronized (snd) {
-				snd.writeObject(MSSDataObject.LOGIN_BAN);
-				snd.flush();
+			synchronized (send) {
+				send.writeObject(MSSDataObject.LOGIN_BAN);
+				send.flush();
 				myself = new Spieler(credentials.split("\t")[0] + "(gebannt)");
 				close();
 			}
@@ -148,9 +148,9 @@ public class ClientThread implements Runnable {
 			}
 		}
 		//Status der Prüfung mitteilen
-		synchronized (snd) {
-			snd.writeObject(new MSSDataObject(logon,myself));
-			snd.flush();
+		synchronized (send) {
+			send.writeObject(new MSSDataObject(logon,myself));
+			send.flush();
 		}
 		//Bei Erfolg den anderen Teilnehmern den neuen Benutzer bekannt machen
 		if (logon == MSSDataObject.LOGIN_SUCCESS) {
