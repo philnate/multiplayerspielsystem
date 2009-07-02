@@ -17,6 +17,7 @@ public class SharedClientInfo {
 	private static RandomAccessFile users = null;
 	private static RandomAccessFile banned = null;
 	private static String banfile = "./banlist.txt";
+	private static Spieler admin = new Spieler("Admin");
 
 	private SharedClientInfo(){}
 	
@@ -141,7 +142,7 @@ public class SharedClientInfo {
 	 * Übermitteln von Nachrichten an alle anderen Teilnehmer und evtl sich selbst
 	 */
 	public void notifyOthers(int type, String message, ClientThread sender) {
-		String name = (sender != null)? sender.myself.getName():"Admin";
+		String name = (sender != null)? sender.myself.getName():admin.getName();
 		if (type == MSSDataObject.BC_MESSAGE && sender != null) {
 			sender.window.addMessage(name + ":" + message, name.hashCode());
 		}
@@ -150,7 +151,12 @@ public class SharedClientInfo {
 			for (int i = 0; i < sci.getSiblings().size(); i++) {
 				ClientThread sibling = sci.getSiblings().get(i);
 				Object data = message;
-				Spieler fromUser = sender.myself;//new Spieler(name);
+				Spieler fromUser;
+				if (sender != null) {
+					fromUser = sender.myself;
+				} else {
+					fromUser = admin;
+				}
 				if (sibling != sender) {
 					synchronized (sibling.snd) {
 						try {

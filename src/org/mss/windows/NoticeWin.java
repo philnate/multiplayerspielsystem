@@ -32,6 +32,7 @@ public class NoticeWin {
 		window.add(label,BorderLayout.NORTH);
 		window.add(accept, BorderLayout.SOUTH);
 		window.setPreferredSize(dim);
+		window.setLocationRelativeTo(null);
 		label.setPreferredSize(new Dimension(dim.width,Math.round(dim.height*.8F)));
 		accept.setPreferredSize(new Dimension(dim.width, Math.round(dim.height*0.2F)));
 	}
