@@ -21,6 +21,10 @@ public class MSSDataObject implements Serializable {
 	public static final int USER_WARN = 0xc1;
 	public static final int USER_KICK = 0xc3;
 	public static final int USER_BAN = 0xc5;
+	public static final int GAME_REQUEST = 0xd1;
+	public static final int GAME_ANSWER = 0xd2;
+	public static final int GAME_TURN = 0xd3;
+	public static final int GAME_CLOSED = 0xd4;
 	/**
 	 * 
 	 */
@@ -31,13 +35,18 @@ public class MSSDataObject implements Serializable {
 	private Object data;
 	private Spieler fromUser;
 
-	public MSSDataObject(int type, Object data, Spieler[] toUser, Spieler fromUser) {
+	public MSSDataObject(int type, Object data, Spieler[] toUser, Spieler fromUser, String additionalData) {
 		this.type = type;
 		this.toUser = toUser;
 		this.data = data;
 		this.fromUser = fromUser;
+		this.additionalData = additionalData;
 	}
 	
+	public MSSDataObject(int type, Object data, Spieler[] toUser, Spieler fromUser) {
+		this(type, data, toUser, fromUser, "");
+	}
+
 	public MSSDataObject(int type, Object data) {
 		this(type, data, null, null);
 	}

@@ -12,6 +12,8 @@ import org.mss.utils.Console;
 
 public class SharedClientInfo {
 	private static ArrayList<ClientThread> siblings = new ArrayList<ClientThread>(5);
+	private static ArrayList<String> games = new ArrayList<String>(10);
+
 	private static SharedClientInfo sci = null;
 	private static String userfile = "./userlist.txt";
 	private static RandomAccessFile users = null;
@@ -34,7 +36,7 @@ public class SharedClientInfo {
 		}
 		return sci;
 	}
-	
+
 	public void addSibling(ClientThread sibling) {
 		synchronized(siblings) {
 			siblings.add(sibling);
@@ -55,6 +57,26 @@ public class SharedClientInfo {
 		return siblings.toArray(new ClientThread[0]);
 	}
 	
+	public void addGame(String game) {
+		synchronized (games) {
+			games.add(game);
+		}
+	}
+	
+	public void removeGame(String game) {
+		synchronized(games) {
+			for (int i = 0; i < games.size(); i++) {
+				if (games.get(i).contains(game)) {
+					games.remove(i);
+					return;
+				}
+			}
+		}
+	}
+
+	public String[] getGames() {
+		return games.toArray(new String[0]);
+	}
 	/*
 	 * Prüfen ob Benutzer bereits angemeldet ist
 	 */
@@ -70,7 +92,6 @@ public class SharedClientInfo {
 		}
 	}
 	
-
 	/*
 	 * Sucht nach dem Benutzer in der Benutzerdatei
 	 */
@@ -191,6 +212,29 @@ public class SharedClientInfo {
 						try {
 							sender.send.writeObject(new MSSDataObject(type, data, fromUser));
 							sender.send.flush();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public void sendTo(MSSDataObject data) {
+		synchronized (siblings) {
+			Iterator<ClientThread> it = siblings.iterator();
+			Spieler current;
+			ClientThread curThread;
+			while(it.hasNext()) {
+				curThread = it.next();
+				current = curThread.myself;
+				for (int i=0; i < data.getToUser().length; i++) {
+					if (current.toString().contentEquals(data.getToUser()[i].toString())) {
+						try {
+							curThread.send.writeObject(data);
+							curThread.send.flush();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();

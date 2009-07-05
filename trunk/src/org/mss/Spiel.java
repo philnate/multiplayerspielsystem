@@ -4,10 +4,16 @@ import org.mss.Spieler;
 import org.mss.types.Zug;
 import org.mss.utils.Console;
 
+import java.awt.event.WindowListener;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public abstract class Spiel extends Spielfeld implements Protokollierbar {
+public abstract class Spiel extends Spielfeld implements Protokollierbar, Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8405472722827386734L;
 	protected ArrayList<Spieler> spieler = new ArrayList<Spieler>(2);
 	protected boolean track = false;
 	protected Spieler[] gewinner = null;
@@ -45,6 +51,17 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 			}
 		} while (error);
 		return gewinner;
+	}
+
+	public void show() {
+		fenster.setVisible(true);
+		fenster.setLocationRelativeTo(null);
+		fenster.toFront();
+	}
+
+	public void dispose() {
+		fenster.setVisible(false);
+		fenster.dispose();
 	}
 
 	public Spieler[] listeSpieler() {
@@ -111,5 +128,9 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar {
 	
 	public boolean plusSpieler(Spieler spieler) throws Exception{
 		return this.spieler.add(spieler);
+	}
+	
+	public void addListener(WindowListener listener) {
+		fenster.addListener(listener);
 	}
 }

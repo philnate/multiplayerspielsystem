@@ -54,9 +54,11 @@ public class NoticeWin {
 				}
 			}
 		});
-
+		
 		window.pack();
 		window.setVisible(true);
+		accept.requestFocus();
+
 		synchronized(nop) {
 			try {
 				nop.wait();

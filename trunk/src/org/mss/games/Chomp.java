@@ -13,6 +13,10 @@ import org.mss.Spieler;
 import org.mss.Spielfenster;
 
 public class Chomp extends Spiel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -443554258682417148L;
 	private boolean spieler1 = true;
 	private final static String[] playerSigns = new String[2];
 
@@ -44,6 +48,10 @@ public class Chomp extends Spiel {
 		this(7,4);
 	}
 
+	public void show() {
+		fenster.setTitle("Chomp:" + spieler.get(0).getName() + "-" +spieler.get(1).getName());
+		super.show();
+	}
 	@Override
 	public Spieler[] spielzug(Zug zug) throws Exception {
 
@@ -81,15 +89,9 @@ public class Chomp extends Spiel {
 	@Override
 	public Zug frageSpieler(Spieler spieler) {
 		if (spieler.isComp()) {
-//			System.out.println("Computer "+ spieler.getName() + " ist an der Reihe.");
 			return kI(spieler);
 		}
 		fenster.setLocked(false);
-//		System.out.println(spieler.toString() + " du bist dran:");
-//		System.out.println("Wähle eine Spalte:");
-//		int col = Console.read(-1);
-//		System.out.println("Wähle eine Zeile:");
-//		int row = Console.read(-1);
 		try {
 			synchronized (fenster) {
 				fenster.wait();

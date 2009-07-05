@@ -9,6 +9,9 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -34,6 +37,8 @@ public class Spielfenster extends JFrame implements MouseListener {
 	JLabel[] widths;
 	SVGPanel[][] positions;
 	ArrayList<FieldClickedListener> listener = new ArrayList<FieldClickedListener>(1);
+	ArrayList<WindowListener> alistener = new ArrayList<WindowListener>(1);
+
 	GridBagLayout gbl = new GridBagLayout();
 	int posX = -1;
 	int posY = -1;
@@ -43,13 +48,14 @@ public class Spielfenster extends JFrame implements MouseListener {
 	public Spielfenster(int x, int y, String initialDisplay) {
 		positions = new SVGPanel[y][x];
 		
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLayout(gbl);
 		this.setSize(new Dimension(800,800));
 		heights = new JLabel[y];
 		widths = new JLabel[x];
 
-		GridBagLayout gblField = new GridBagLayout();
+		GridLayout gblField = new GridLayout();
+		gblField.setRows(y+1);
+		gblField.setColumns(x+1);
 		field.setBorder(BorderFactory.createLineBorder(Color.black));
 		field.setLayout(gblField);
 		for (int i = 0; i < y; i++) {
@@ -58,23 +64,36 @@ public class Spielfenster extends JFrame implements MouseListener {
 				positions[i][j].addMouseListener(this);
 				positions[i][j].setBorder(BorderFactory.createLineBorder(Color.black));
 				positions[i][j].specialInfo = y-i-1 + ":" + j;
-				addComponent(field, gblField, positions[i][j], j, i, 1, 1, 1, 1);
+				field.add(positions[i][j], null);
+				//addComponent(field, gblField, positions[i][j], j, i, 1, 1, 1, 1);
 			}
 			heights[i] = new JLabel(""+(y-i-1));
 			heights[i].setHorizontalAlignment(SwingConstants. CENTER);
 			heights[i].setPreferredSize(new Dimension(10,10));
-			addComponent(field, gblField, heights[i], x+1, i, 1, 1, 1, 1);
+			field.add(heights[i], null);
+//			addComponent(field, gblField, heights[i], x+1, i, 1, 1, 1, 1);
 		}
 
 		for (int i = 0; i < x; i++) {
 			widths[i] = new JLabel(""+i);
 			widths[i].setHorizontalAlignment(SwingConstants.CENTER);
 			widths[i].setPreferredSize(new Dimension(10,10));
-			addComponent(field, gblField, widths[i], i, y+1, 1, 1, 1, 1);
+			//addComponent(field, gblField, widths[i], i, y+1, 1, 1, 1, 1);
+			field.add(widths[i],null);
 		}
 
 		addComponent(this, gbl, field, 0, 0, 10, 10, 1, 1);
-//		field.setPreferredSize(new Dimension(300,300));
+		
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.out.println("yo");
+				for (int i = 0; i < alistener.size(); i++) {
+					System.out.println("-"+i);
+					alistener.get(i).windowClosing(e);
+				}
+			}
+		});
+		field.setPreferredSize(new Dimension(300,300));
 	}
 	//TODO dynamisch Spieler hinzufügen
 	public void setPlayer(Spieler[] spieler, String[] playerSigns) {
@@ -172,10 +191,15 @@ public class Spielfenster extends JFrame implements MouseListener {
 	public void setLocked(boolean bool) {
 		locked = bool;
 	}
+
 	public void addFieldClickedListener(FieldClickedListener listener) {
 		this.listener.add(listener);
 	}
-	
+
+	public void addListener(WindowListener listener) {
+		this.alistener.add(listener);
+	}
+
 	public FieldClickedListener[] getFieldClickedListener() {
 		return this.listener.toArray(new FieldClickedListener[0]);
 	}

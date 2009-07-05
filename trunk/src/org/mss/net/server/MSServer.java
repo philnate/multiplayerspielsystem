@@ -2,6 +2,7 @@ package org.mss.net.server;
 
 import org.mss.utils.*;
 import org.mss.windows.MainWin;
+import org.mss.windows.NoticeWin;
 import org.mss.windows.QueryWin;
 
 import java.awt.Dimension;
@@ -32,31 +33,25 @@ public class MSServer {
 			mainWin.show();
 
 			listener = new ServerSocket(usePort);
-			Connector connector = new Connector(listener, mainWin);
-			Thread connect = new Thread(connector);
-			connect.start();
-			while (true) {//Was will Admin machen
-				switch (Console.read("?").charAt(0)) {
-				case 'x':
-					Console.write("Server wird herunter gefahren!");
-					System.exit(0);
-					break;
-				case 'w':
-				case 'k':
-					Console.write("Nicht eingebaut aktuell");
-					break;
-				default:
-					Console.write("Mögliche Befehle:");
-					Console.write("u - Liste aller angemeldeten Benutzer");
-					Console.write("x - Beendet Server");
-					Console.write("k NAME- Benutzer mit dem Namen NAME kicken");
-					Console.write("w NAME - Benutzer mit dem Namen NAME verwarnen");
-					break;
+			mainWin.addMessage("Warte auf neuen Teilnehmer!", mainWin.COLOR_NOTE);
+			try {
+				while (true) {
+					//wartet auf neuen Teilnehmer und weist ihm anschließend seinen ClientThread zu
+					ClientThread client = new ClientThread(listener.accept(), mainWin);
+					Thread clientThread = new Thread(client);
+					clientThread.start();
 				}
+			} catch (IOException e) {
+				//Irgendein Fehler ist aufgetreten im Socket, lieber beenden.
+				Console.log("Fehler bei Verbindungsaufnahme mit Client!");
+				System.exit(1);
+				e.printStackTrace();
 			}
 		} catch (IOException e) {
 			//Nur ein Server pro Host/Port
-			Console.write("Server läuft bereits und nur eine Instanz erlaubt! Programm wird beendet!");
+			NoticeWin nw = new NoticeWin("Server läuft bereits!","Server läuft bereits und nur eine Instanz erlaubt! Programm wird beendet!", new Dimension(300,100));
+			nw.show();
+			System.exit(1);
 		}
 	}
 }

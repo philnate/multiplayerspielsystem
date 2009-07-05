@@ -160,8 +160,10 @@ public class QueryWinDouble {
 			}
 		});
 
+
 		window.pack();
 		window.setVisible(true);
+		input1.requestFocus();
 		synchronized (nop) {
 			try {
 				nop.wait();

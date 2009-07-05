@@ -47,6 +47,7 @@ public class ClientThread implements Runnable {
 					e.printStackTrace();
 				} catch (EOFException e) {
 					//Verbindung wurde beendet
+					e.printStackTrace();
 					throw new SocketException();
 				}
 				switch (inData.getType()) {
@@ -63,6 +64,20 @@ public class ClientThread implements Runnable {
 						}
 					}
 					break;
+				case MSSDataObject.GAME_ANSWER:
+					sci.addGame(this.myself.getName() + "-" + inData.getToUser()[0].getName());
+					window.refreshGames();
+					sci.sendTo(inData);
+					break;
+				case MSSDataObject.GAME_REQUEST:
+				case MSSDataObject.GAME_TURN:
+					sci.sendTo(inData);
+					break;
+				case MSSDataObject.GAME_CLOSED:
+					sci.removeGame(this.myself.getName());
+					window.refreshGames();
+					if (inData.getToUser() != null) sci.sendTo(inData);//Einer hat gewonnen
+					break;
 				case -1:
 					throw new SocketException();
 				default:
@@ -72,7 +87,9 @@ public class ClientThread implements Runnable {
 		} catch (IOException e) {
 			if (e.getClass() == SocketException.class) {
 				//Verbindung wurde getrennt also im Server anzeigen
-				window.addMessage("Verbindung von Benutzer " + myself.getName() + " wurde getrennt.",window.COLOR_NOTE);
+				if (myself != null) {
+					window.addMessage("Verbindung von Benutzer " + myself.getName() + " wurde getrennt.",window.COLOR_NOTE);
+				}
 			} else {
 				e.printStackTrace();
 			}
@@ -88,6 +105,9 @@ public class ClientThread implements Runnable {
 				e1.printStackTrace();
 			}
 			//Aus der Prozessliste entfernen
+			if (myself != null) {
+				sci.removeGame(myself.getName());
+			}
 			sci.removeSibling(this);
 			window.refreshUserlist();
 			return;
