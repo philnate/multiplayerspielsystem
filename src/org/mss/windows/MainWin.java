@@ -37,7 +37,8 @@ public class MainWin {
 	JMenuItem mIWarn = new JMenuItem("User verwarnen");
 	JMenuItem mIBan = new JMenuItem("User bannen");
 	JList userlist = new JList(sci.getSiblingsArray());	
-	
+	JList games = new JList();
+
 	String htmlStart = "<html><body>";
 	String htmlEnd = "</html></body>";
 	String chatLines = "";
@@ -74,6 +75,7 @@ public class MainWin {
 		addComponent(window, gbl, new JScrollPane(input), 0, 11, 1, 10, 9, 2);
 		addComponent(window, gbl, new JScrollPane(userlist),11,0,1,10,.1,10);
 		addComponent(window, gbl, submit, 11,11,1,1,0.5,0.5);
+		addComponent(window, gbl, new JScrollPane(games), 12,0,1,10,0.9,2);
 
 		window.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
@@ -189,7 +191,11 @@ public class MainWin {
 			userlist.setListData(sci.getSiblingsArray());
 		}
 	}
-	
+	public void refreshGames() {
+		synchronized (sci.getGames()) {
+			games.setListData(sci.getGames());
+		}
+	}
 	public void addMessage(String message, int color) {
 		String colorcode = "#";
 		switch (color) {

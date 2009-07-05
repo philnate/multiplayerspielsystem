@@ -1,8 +1,14 @@
 package org.mss.types;
 
+import java.io.Serializable;
+
 import org.mss.Spieler;
 
-public class Zug {
+public class Zug implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8002531918533708021L;
 	private int aufX;
 	private int aufY;
 	private Spieler spieler;

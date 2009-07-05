@@ -11,7 +11,11 @@ import java.util.Iterator;
 import org.mss.utils.Console;
 import org.mss.windows.svg.SVGPanel;
 
-public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
+public final class Viergewinnt extends Spiel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4717226035090425060L;
 	private boolean spieler1 = true;
 	private int[] freieFelder;
 	private final static String[] playerSigns = new String[2];
@@ -41,12 +45,15 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 		playerSigns[1] = SVGPanel.CROSS;
 
 		fenster = new Spielfenster(breite,hoehe,SVGPanel.FULL);
-		fenster.setVisible(true);
-		fenster.toFront();
 	}
 
 	public Viergewinnt() {
 		this(7, 6);
+	}
+
+	public void show() {
+		fenster.setTitle("Viergewinnt:" + spieler.get(0).getName() + "-" +spieler.get(1).getName());
+		super.show();
 	}
 
 	@Override
@@ -76,7 +83,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 				if (track) {
 					speicherZug(turn);
 				}
-				this.zeigeFeld();
+//				this.zeigeFeld();
 				checkWin(this.feld);
 			} else {
 				if (turn.getSpieler().isComp()) {
@@ -123,11 +130,8 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 
 	public Zug frageSpieler(Spieler spieler) {
 		if (spieler.isComp()) {
-//			System.out.println("Computer " + spieler.getName() + " ist an der Reihe.");
 			return kI(spieler);
 		}
-//		System.out.println(spieler.toString() + " du bist dran:");
-//		System.out.println("Wähle eine Spalte:");
 		fenster.setLocked(false);
 		try {
 			synchronized (fenster) {
@@ -137,7 +141,7 @@ public final class Viergewinnt extends Spiel /*implements Protokollierbar*/ {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return new Zug(spieler, 0,0, fenster.getPosX(),0);//Console.read(-1), 0);
+		return new Zug(spieler, 0,0, fenster.getPosX(),0);
 	}
 	
 	public boolean plusSpieler(Spieler spieler) throws Exception {

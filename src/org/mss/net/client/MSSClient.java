@@ -1,7 +1,11 @@
 package org.mss.net.client;
 
+import org.mss.Spiel;
 import org.mss.Spieler;
+import org.mss.games.Chomp;
+import org.mss.games.Viergewinnt;
 import org.mss.types.MSSDataObject;
+import org.mss.utils.listener.CurGameClosedListener;
 import org.mss.windows.ClientMainWin;
 import org.mss.windows.NoticeWin;
 import org.mss.windows.QueryWinDouble;
@@ -29,7 +33,7 @@ public class MSSClient {
 		QueryWinDouble gwd = new QueryWinDouble("Verbindungsangaben","Host", "Port", "Ok", addr, Integer.toString(port), new Dimension(300,100));
 		QueryWinYesNo qyn;
 		NoticeWin nw;
-
+		Thread run;
 		gwd.show();
 		if (gwd.isCanceled()) System.exit(0);
 		
@@ -39,17 +43,19 @@ public class MSSClient {
 		boolean tryAgain = false;
 		boolean wasLoggedIn = false;
 		ClientMainWin guiCMainWin = null;
+		Spiel curGame = null;
+
 		//Falls Verbindungsabbrüche und derart stattfanden kann der Spieler es erneut versuchen
 		while (!tryAgain) {
 			try {
 				server = new Socket(addr, port);
 				tryAgain = true;
-				ObjectOutputStream snd = new ObjectOutputStream(server.getOutputStream());
-				snd.flush();
+				final ObjectOutputStream send = new ObjectOutputStream(server.getOutputStream());
+				send.flush();
 				//Damit Gegenstelle InputStream öffnen kann
 				ObjectInputStream red = new ObjectInputStream(server.getInputStream());
 				if (guiCMainWin == null) {
-					guiCMainWin = new ClientMainWin(snd);
+					guiCMainWin = new ClientMainWin(send, curGame);
 				}
 
 				boolean resume = true;
@@ -67,19 +73,19 @@ public class MSSClient {
 					}
 					switch (inData.getType()) {
 					case MSSDataObject.SND_LOGIN:
-						login(snd);
+						login(send);
 						break;
 					case MSSDataObject.LOGIN_SUCCESS:
 						wasLoggedIn = true;
 						myself =(Spieler) inData.getData();
-						guiCMainWin.setUsername(myself.getName());
+						guiCMainWin.setSpieler(myself);
 						guiCMainWin.setVisible(true);
 						break;
 					case MSSDataObject.LOGIN_FAILED:
 						qyn = new QueryWinYesNo ("Anmeldung fehlgeschlagen!", "Anmeldung fehlgeschlagen. Erneut versuchen?", new Dimension(300,100));
 						qyn.show();
 						if (qyn.getAnswer()) {
-							login(snd);// Erneute Anmeldung
+							login(send);// Erneute Anmeldung
 						} else {
 							resume = false;
 						}
@@ -88,7 +94,7 @@ public class MSSClient {
 						qyn = new QueryWinYesNo ("Passwort falsch!", "Falsches Passwort! Erneut versuchen?", new Dimension(300,100));
 						qyn.show();
 						if (qyn.getAnswer()) {
-							login(snd);// Erneute Anmeldung
+							login(send);// Erneute Anmeldung
 						} else {
 							resume = false;
 						}
@@ -97,7 +103,7 @@ public class MSSClient {
 						qyn = new QueryWinYesNo ("Bereits online!", "Es ist Bereits ein Benutzer mit diesen Namen online. Als anderer Benutzer anmelden?", new Dimension(300,100));
 						qyn.show();
 						if (qyn.getAnswer()) {
-							login(snd);//Erneute Anmeldung
+							login(send);//Erneute Anmeldung
 						} else {
 							resume = false;
 						}
@@ -154,6 +160,73 @@ public class MSSClient {
 					case MSSDataObject.BC_MESSAGE:
 						guiCMainWin.addMessage(inData.getFromUser().getName() + ":" + (String)inData.getData());
 						break;
+					case MSSDataObject.GAME_REQUEST:
+						Spieler answer = null;
+						if (curGame == null) {
+							qyn = new QueryWinYesNo("Spieleinladung", "Der Spieler "+ inData.getFromUser().getName() + " möchte Sie auf eine Party " + inData.getData().toString() + " einladen", new Dimension(400,100));
+							//TODO nicht weitere Nachrichten blockieren..
+							qyn.show();
+							if (qyn.getAnswer()) {
+								answer = myself;
+								if (inData.getData().toString().contentEquals("Chomp")) {
+									curGame = new Chomp();
+								} else {
+									curGame = new Viergewinnt();
+								}
+								try {
+									curGame.plusSpieler(inData.getFromUser());
+									curGame.plusSpieler(myself);
+									curGame.addListener(new CurGameClosedListener(send, inData.getFromUser(),guiCMainWin));
+									curGame.show();
+									guiCMainWin.addMessage("Du befindest dich jetzt im Spiel mit " + inData.getFromUser().getName());
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+						}
+						send.writeObject(new MSSDataObject(MSSDataObject.GAME_ANSWER, answer,new Spieler[]{inData.getFromUser()},myself,inData.getAdditionalData()));
+						break;
+					case MSSDataObject.GAME_ANSWER:
+						if (inData.getData() == null) { 
+							nw = new NoticeWin("Spielanfrage","Ihre Anfrage an " + inData.getFromUser().getName() + " bezüglich einer Runde " + inData.getAdditionalData() +" wurde abgelehnt!", new Dimension(300, 100));
+							nw.show();
+						} else {
+							if (inData.getAdditionalData().contentEquals("Chomp")) {
+								curGame = new Chomp();
+							} else {
+								curGame = new Viergewinnt();
+							}
+							try {
+								curGame.plusSpieler(myself);
+								curGame.plusSpieler(inData.getFromUser());
+								curGame.addListener(new CurGameClosedListener(send, inData.getFromUser(),guiCMainWin));
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							guiCMainWin.addMessage("Du befindest dich jetzt im Spiel mit " + inData.getFromUser().getName());
+							curGame.show();
+							run = new Thread(new RunnableTurn(true, send, inData, myself, curGame, guiCMainWin));
+							run.start();
+						}
+						break;
+					case MSSDataObject.GAME_TURN:
+						for (int i = 0; i < curGame.listeSpieler().length; i++) {
+							if (inData.getFromUser() == curGame.listeSpieler()[i]) {
+								run = new Thread(new RunnableTurn(false, send, inData, myself, curGame, guiCMainWin));
+								run.start();
+								break;
+							}
+						}
+						break;
+					case MSSDataObject.GAME_CLOSED:
+						nw = new NoticeWin("Spielbeendet", "Dein Gegenspieler hat das Spiel beendet!", new Dimension(300,100));
+						nw.show();
+						curGame.dispose();
+						curGame = null;
+						guiCMainWin.addMessage("Das Spiel wurde von deinem Gegenspieler verlassen!");
+						break;
 					default:
 						guiCMainWin.addMessage("Unbekannten Befehl erhalten:" + inData.getType());
 					}
@@ -202,5 +275,4 @@ public class MSSClient {
 		snd.writeObject(new MSSDataObject(MSSDataObject.SND_LOGIN, gwd.getInput1Text().replace("\\", "") + "\t" + gwd.getInput2Text().replace("\\", "")));
 		snd.flush();
 	}
-
 }

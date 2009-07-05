@@ -64,6 +64,8 @@ public class QueryWinYesNo {
 		
 		window.pack();
 		window.setVisible(true);
+		yes.requestFocus();
+
 		synchronized (nop) {
 			try {
 				nop.wait();

@@ -28,6 +28,7 @@ import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.mss.Spiel;
 import org.mss.Spieler;
 import org.mss.types.MSSDataObject;
 
@@ -49,13 +50,14 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 	JPopupMenu menu = new JPopupMenu();
 	JMenu fourwins = new JMenu("Viergewinnt");
 	JMenu chomp = new JMenu("Chomp");
-	JMenuItem offline = new JMenuItem("Gegen PC");
-	JMenuItem online = new JMenuItem("Gegen Mensch");
-
+	JMenuItem f_offline = new JMenuItem("Gegen PC");
+	JMenuItem f_online = new JMenuItem("Gegen Mensch");
+	JMenuItem c_offline = new JMenuItem("Gegen PC");
+	JMenuItem c_online = new JMenuItem("Gegen Mensch");	
+	Spiel curGame = null;
 
 	ObjectOutputStream send;
 	Vector<String> users = new Vector<String>();
-	String username = "";
 	String htmlStart = "<html><body>";
 	String htmlEnd = "</html></body>";
 	String chatLines = "";
@@ -64,15 +66,14 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 	public final int COLOR_NORMAL = 0x2;
 	public final int COLOR_IMPORTANT = 0x3;
 	public final int COLOR_SELF = 0x4;
+	private Spieler spieler;
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public ClientMainWin(ObjectOutputStream send) {
+	public ClientMainWin(ObjectOutputStream send, Spiel curGame) {
+		this.setTitle("MSS Client - Lobby");
 		this.send = send;
 		this.setResizable(true);
 		this.setLocationRelativeTo(null);
+		this.curGame = curGame;
 		GridBagLayout gbl = new GridBagLayout();
 		this.setLayout(gbl);
 
@@ -84,10 +85,10 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 
 		menu.add(fourwins);
 		menu.add(chomp);
-		fourwins.add(offline);
-		fourwins.add(online);
-		chomp.add(offline);
-		chomp.add(online);
+		fourwins.add(f_offline);
+		fourwins.add(f_online);
+		chomp.add(c_offline);
+		chomp.add(c_online);
 
 		// Ausgabe-Feld
 		messages.setEditable(false);
@@ -105,6 +106,8 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 		// Send-Button
 		setComp(this, gbl, bSend, 2, 3, 1, 1);
 		bSend.addActionListener(this);
+		
+		//Fenster schlieﬂen
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				System.exit(0);
@@ -124,10 +127,53 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 				}
 			}
 		});
+		//Viergewinnt gegen PC
+		f_offline.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println(e.getSource().toString());
+			}
+		});
+		//Viergewinnt gegen Mensch
+		f_online.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				sendGameRequest("Viergewinnt");
+			}
+		});
+		//Chomp gegen PC
+		c_offline.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println(e.getSource().toString());
+			}
+		});
+		//Chomp gegen Mensch
+		c_online.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				sendGameRequest("Chomp");
+			}
+		});
 		this.pack();
 	}
 
-	void setComp(Container c, GridBagLayout gbl, Component comp, int x, int y, int h, int w) {
+	private void sendGameRequest(String game) {
+		synchronized (send) {
+			try {
+				if (userlist.getSelectedValue() == null || curGame != null || userlist.getSelectedValue() == spieler) return;
+				Spieler[] enemy = new Spieler[1];
+				enemy[0] = (Spieler) userlist.getSelectedValue();
+				send.writeObject(new MSSDataObject(MSSDataObject.GAME_REQUEST, game, enemy, spieler));
+				send.flush();
+				//TODO Anzeige das Anfrage aussteht...auch abbrechbar...
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void setComp(Container c, GridBagLayout gbl, Component comp, int x, int y, int h, int w) {
 
 		GridBagConstraints gbc = new GridBagConstraints();
 
@@ -167,7 +213,7 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 
 	public void send() {
 		synchronized (send) {
-			addMessage(username +":"+ txtSend.getText());
+			addMessage(spieler.getName() + ":" + txtSend.getText());
 			try {
 				send.writeObject(new MSSDataObject(MSSDataObject.BC_MESSAGE, txtSend.getText()));
 				send.flush();
@@ -177,6 +223,10 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 			}
 		}
 		txtSend.setText("");
+	}
+
+	public void setSpieler(Spieler spieler) {
+		this.spieler = spieler;
 	}
 
 	public synchronized void addMessage(String text) {
