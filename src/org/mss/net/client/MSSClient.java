@@ -124,6 +124,18 @@ public class MSSClient {
 						users.remove(usr);
 						guiCMainWin.addMessage(usr.getName() + " hat sich abgemeldet!");
 						guiCMainWin.refreshUsers(users);
+						if (curGame != null && !curGame.isClosed()) {
+							Spieler[] aktuell = curGame.listeSpieler();
+							for (int i= 0; i < aktuell.length; i++) {
+								if (aktuell[i].getName().equals(usr.getName())) {
+									nw = new NoticeWin("Spielbeendet", "Dein Gegenspieler hat das Spiel beendet!", new Dimension(300,100));
+									nw.show();
+									curGame.close();
+									guiCMainWin.addMessage("Das Spiel wurde von deinem Gegenspieler verlassen!");
+									break;
+								}
+							}
+						}
 						break;
 					case MSSDataObject.USER_WARN://ATTN nicht einfach so verschieben Code in USER_BAN wichtig
 					case MSSDataObject.USER_KICK:// -''-
@@ -162,7 +174,7 @@ public class MSSClient {
 						break;
 					case MSSDataObject.GAME_REQUEST:
 						Spieler answer = null;
-						if (curGame == null) {
+						if (curGame == null || curGame.isClosed()) {
 							qyn = new QueryWinYesNo("Spieleinladung", "Der Spieler "+ inData.getFromUser().getName() + " möchte Sie auf eine Party " + inData.getData().toString() + " einladen", new Dimension(400,100));
 							//TODO nicht weitere Nachrichten blockieren..
 							qyn.show();
@@ -176,7 +188,7 @@ public class MSSClient {
 								try {
 									curGame.plusSpieler(inData.getFromUser());
 									curGame.plusSpieler(myself);
-									curGame.addListener(new CurGameClosedListener(send, inData.getFromUser(),guiCMainWin));
+									curGame.addListener(new CurGameClosedListener(send, inData.getFromUser(),guiCMainWin, curGame));
 									curGame.show();
 									guiCMainWin.addMessage("Du befindest dich jetzt im Spiel mit " + inData.getFromUser().getName());
 								} catch (Exception e) {
@@ -185,7 +197,8 @@ public class MSSClient {
 								}
 							}
 						}
-						send.writeObject(new MSSDataObject(MSSDataObject.GAME_ANSWER, answer,new Spieler[]{inData.getFromUser()},myself,inData.getAdditionalData()));
+						send.writeObject(new MSSDataObject(MSSDataObject.GAME_ANSWER, answer,new Spieler[]{inData.getFromUser()},myself,(String)inData.getData()));
+						send.flush();
 						break;
 					case MSSDataObject.GAME_ANSWER:
 						if (inData.getData() == null) { 
@@ -200,7 +213,7 @@ public class MSSClient {
 							try {
 								curGame.plusSpieler(myself);
 								curGame.plusSpieler(inData.getFromUser());
-								curGame.addListener(new CurGameClosedListener(send, inData.getFromUser(),guiCMainWin));
+								curGame.addListener(new CurGameClosedListener(send, inData.getFromUser(),guiCMainWin, curGame));
 							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -223,8 +236,9 @@ public class MSSClient {
 					case MSSDataObject.GAME_CLOSED:
 						nw = new NoticeWin("Spielbeendet", "Dein Gegenspieler hat das Spiel beendet!", new Dimension(300,100));
 						nw.show();
-						curGame.dispose();
-						curGame = null;
+						curGame.close();
+//						curGame.dispose();
+//						curGame = null;
 						guiCMainWin.addMessage("Das Spiel wurde von deinem Gegenspieler verlassen!");
 						break;
 					default:

@@ -6,12 +6,14 @@ import org.mss.types.Zug;
 import org.mss.Spieler;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import org.mss.utils.Console;
 import org.mss.windows.svg.SVGPanel;
 
-public final class Viergewinnt extends Spiel {
+public final class Viergewinnt extends Spiel{
 	/**
 	 * 
 	 */
@@ -45,6 +47,35 @@ public final class Viergewinnt extends Spiel {
 		playerSigns[1] = SVGPanel.CROSS;
 
 		fenster = new Spielfenster(breite,hoehe,SVGPanel.FULL);
+		fenster.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int[] freiFelder = new int[getBreite()];
+				for (int i = 0; i < getBreite(); i++) {
+					freiFelder[i] = getHoehe();
+				}
+				if (e.getActionCommand().contentEquals("<")) {
+					if (zeigeBisZug > 0) {
+						zeigeBisZug--;
+					}
+				} else if (e.getActionCommand().contentEquals(">")) {
+					if (zeigeBisZug < zuege.size()) {
+						zeigeBisZug++;
+					}
+				}
+				fenster.clear();
+				spieler1 = true;
+				Iterator<Zug> itZuege = zuege.iterator();
+				Zug aktZug;
+				int i=0;
+				while(i < zeigeBisZug) {
+					aktZug = itZuege.next();
+					fenster.setPicture(aktZug.getAufX(), --freiFelder[aktZug.getAufX()], ((spieler1)? playerSigns[0]: playerSigns[1]), new Color(aktZug.getSpieler().getName().hashCode()));
+					spieler1 = !spieler1;
+					i++;
+				}
+			}
+		});
 	}
 
 	public Viergewinnt() {
@@ -67,6 +98,7 @@ public final class Viergewinnt extends Spiel {
 
 	@Override
 	public Spieler[] spielzug(Zug turn) throws Exception{
+		if (closed) return null;
 		if (gewinner != null) return null;//jemand hat bereits gewonnen also aufhören mit weiterspielen
 		if (spieler.size() != 2) {
 			throw new Exception("Es muss genau 2 Spieler geben!");
@@ -148,7 +180,13 @@ public final class Viergewinnt extends Spiel {
 		if (this.spieler.size() == 2) {
 			throw new Exception("Maximale Zahl von Spielern erreicht!");
 		}
-		return this.spieler.add(spieler);
+		try {
+			return this.spieler.add(spieler);
+		} finally {
+			if (this.spieler.size() == 2) {
+				fenster.setPlayer(this.spieler.toArray(new Spieler[0]), playerSigns);
+			}
+		}
 	}
 	
 	private Zug kI(Spieler spieler) {
@@ -758,13 +796,16 @@ public final class Viergewinnt extends Spiel {
 		if (zuPruefen.contains("XXXX")) {
 			gewinner = new Spieler[1];
 			gewinner[0] = spieler.get(0);
+			close();
 		} else if (zuPruefen.contains("OOOO")) {
 			gewinner = new Spieler[1];
 			gewinner[0] = spieler.get(1);
+			close();
 		} else if (remi()) {
 			gewinner = new Spieler[2];
 			gewinner[0] = this.spieler.get(0);
 			gewinner[1] = this.spieler.get(1);
+			close();
 		} else {
 			gewinner = null;
 		}

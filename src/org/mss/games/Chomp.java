@@ -1,6 +1,8 @@
 package org.mss.games;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
@@ -42,6 +44,42 @@ public class Chomp extends Spiel {
 		playerSigns[0] = SVGPanel.FULL;
 		playerSigns[1] = SVGPanel.FULL;
 		
+		fenster.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int[][] feld = new int[getHoehe()][getBreite()];
+
+				if (e.getActionCommand().contentEquals("<")) {
+					if (zeigeBisZug > 0) {
+						zeigeBisZug--;
+					}
+				} else if (e.getActionCommand().contentEquals(">")) {
+					if (zeigeBisZug < zuege.size()) {
+						zeigeBisZug++;
+					}
+				}
+				fenster.clear();
+				spieler1 = true;
+				
+				Iterator<Zug> itZuege = zuege.iterator();
+				Zug aktZug;
+				int i=0;
+				while(i < zeigeBisZug) {
+					aktZug = itZuege.next();
+					System.out.println(aktZug.toString());
+					for (int k = aktZug.getAufX(); k < getBreite(); k++) {
+						for (int l = getHoehe() -1 - aktZug.getAufY(); l < getHoehe(); l++) {
+							if (feld[l][k] == 0) {
+								feld[l][k] = 1;
+								fenster.setPicture(k, l, ((spieler1)? playerSigns[0]: playerSigns[1]), new Color(aktZug.getSpieler().getName().hashCode()));
+							}
+						}
+					}
+					spieler1 = !spieler1;
+					i++;
+				}
+			}
+		});
 	}
 	
 	public Chomp() {
@@ -54,7 +92,7 @@ public class Chomp extends Spiel {
 	}
 	@Override
 	public Spieler[] spielzug(Zug zug) throws Exception {
-
+		if (closed) return null;
 		if (gewinner != null) return null;
 		if (spieler.size() != 2) {
 			throw new Exception ("Es muss genau Zwei Spieler geben!");
@@ -234,9 +272,11 @@ public class Chomp extends Spiel {
 		switch (feld[0][0].charAt(0)) {
 		case 'X': gewinner = new Spieler[1];
 			gewinner[0] = spieler.get(1);
+			close();
 			break;
 		case 'O': gewinner = new Spieler[1];
 			gewinner[0] = spieler.get(0);
+			close();
 			break;
 		default: break;
 		}

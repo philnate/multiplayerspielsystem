@@ -89,6 +89,8 @@ public class ClientThread implements Runnable {
 				//Verbindung wurde getrennt also im Server anzeigen
 				if (myself != null) {
 					window.addMessage("Verbindung von Benutzer " + myself.getName() + " wurde getrennt.",window.COLOR_NOTE);
+					sci.removeGame(myself.getName());
+					window.refreshGames();
 				}
 			} else {
 				e.printStackTrace();
@@ -105,9 +107,6 @@ public class ClientThread implements Runnable {
 				e1.printStackTrace();
 			}
 			//Aus der Prozessliste entfernen
-			if (myself != null) {
-				sci.removeGame(myself.getName());
-			}
 			sci.removeSibling(this);
 			window.refreshUserlist();
 			return;
