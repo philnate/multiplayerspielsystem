@@ -68,9 +68,9 @@ public class RunnableTurn implements Runnable {
 			guiClientMainWin.addMessage("Du hast das Spiel gegen " + enemy.getName() + " verloren.");
 		}
 		nw.show();
-		curGame.dispose();
-		curGame = null;
-
+//		curGame.dispose();
+//		curGame = null;
+		curGame.close();
 		try {
 			send.writeObject(new MSSDataObject(MSSDataObject.GAME_CLOSED, myself));
 			send.flush();

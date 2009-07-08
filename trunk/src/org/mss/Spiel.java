@@ -15,7 +15,7 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar, Serial
 	 */
 	private static final long serialVersionUID = -8405472722827386734L;
 	protected ArrayList<Spieler> spieler = new ArrayList<Spieler>(2);
-	protected boolean track = false;
+	protected boolean track = true;//Per default mal tracken
 	protected Spieler[] gewinner = null;
 	public abstract Zug frageSpieler(Spieler spieler);
 	public abstract Spieler[] spielzug(Zug turn) throws Exception;
@@ -23,6 +23,8 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar, Serial
 	public abstract Spieler folgeSpieler();
 	protected ArrayList<Zug> zuege = null;
 	protected Spielfenster fenster;
+	protected boolean closed;
+	protected int zeigeBisZug = 0;
 
 	public Spieler[] durchgang() {
 		boolean error =false;
@@ -79,7 +81,6 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar, Serial
 	}
 	
 	public void speicherZug(Zug zug) {
-		System.out.println(zug.toString());
 		zuege.add(zug);
 	}
 
@@ -131,6 +132,15 @@ public abstract class Spiel extends Spielfeld implements Protokollierbar, Serial
 	}
 	
 	public void addListener(WindowListener listener) {
-		fenster.addListener(listener);
+		fenster.addWinListener(listener);
+	}
+	
+	public final void close() {
+		closed = true;
+		fenster.enableHistory();
+	}
+
+	public boolean isClosed() {
+		return closed;
 	}
 }
