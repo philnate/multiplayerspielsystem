@@ -145,7 +145,7 @@ public class Spielfenster extends JFrame implements MouseListener, ActionListene
 		signs[1] = SVGPanel.CROSS;
 		spieler[0] = new Spieler("Phil");
 		spieler[1] = new Spieler("MeMe");
-		Spielfenster fenster = new Spielfenster(20, 20, SVGPanel.FULL);
+		Spielfenster fenster = new Spielfenster(10, 10, SVGPanel.FULL);
 		fenster.setPlayer(spieler, signs);
 		fenster.setVisible(true);
 	}

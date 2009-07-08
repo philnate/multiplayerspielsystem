@@ -3,6 +3,7 @@ package org.mss.windows.svg;
 import java.awt.Color;
 import java.io.IOException;
 
+
 import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
 import org.apache.batik.swing.JSVGCanvas;
 import org.apache.batik.util.XMLResourceDescriptor;
@@ -17,9 +18,9 @@ import org.w3c.dom.Node;
 public class SVGPanel extends JSVGCanvas{
 	
 	private static final long serialVersionUID = 1405056131073275382L;
-	public static String CIRCLE = "/Circle.svg";
-	public static String CROSS = "/Cross.svg";
-	public static String FULL ="/Full.svg";
+	public static String CIRCLE = "https://www.wuala.com/en/api/preview/philnate/public/Circle.svg?key=f2palQYSvKXX";
+	public static String CROSS = "https://www.wuala.com/en/api/preview/philnate/public/Cross.svg?key=f2palQYSvKXX";
+	public static String FULL ="https://www.wuala.com/en/api/preview/philnate/public/Full.svg?key=f2palQYSvKXX";
 	
 	public String specialInfo = "";
 	Color color = null;
@@ -38,9 +39,13 @@ public class SVGPanel extends JSVGCanvas{
 		//Nötigen Klassen zum Laden der SVG erzeugen
 		String parser = XMLResourceDescriptor.getXMLParserClassName();
 		SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parser);
+//	    DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+//DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+//Document document = documentBuilder.newDocument();	
+//	document.setDocumentURI(picture);
 		try {
 			//File Laden aus dem Package
-			document = f.createDocument(getClass().getResource("/" + getClass().getPackage().getName().replace(".", "/") + picture).toString());
+			document = f.createDocument(/*getClass().getResource("/" + getClass().getPackage().getName().replace(".", "/") + picture).toString()*/picture);
 			if (color.getRGB() != 0) {
 				//Farbe ändern falls diese sich vom Defaultwert unterscheidet
 				svg = document.getDocumentElement();
