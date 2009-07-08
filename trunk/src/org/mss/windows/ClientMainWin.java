@@ -85,9 +85,9 @@ public class ClientMainWin extends JFrame implements KeyListener, ActionListener
 
 		menu.add(fourwins);
 		menu.add(chomp);
-		fourwins.add(f_offline);
+//		fourwins.add(f_offline);
 		fourwins.add(f_online);
-		chomp.add(c_offline);
+//		chomp.add(c_offline);
 		chomp.add(c_online);
 
 		// Ausgabe-Feld
